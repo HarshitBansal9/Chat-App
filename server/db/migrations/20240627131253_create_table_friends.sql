@@ -1,7 +1,8 @@
 -- migrate:up
 create table friends (
-    user1_id serial references users(id),
-    user2_id serial references users(id),
+    id serial primary key,
+    user1_id uuid references users(auth_user_id),
+    user2_id uuid references users(auth_user_id),
     accepted boolean default false
 );
 
