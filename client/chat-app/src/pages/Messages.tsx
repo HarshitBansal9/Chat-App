@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 const socket = io("http://localhost:3001");
-import { createClient } from "@supabase/supabase-js";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6amF1dWNpeXB5d3l5cnlyY3Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTkzODQxNjQsImV4cCI6MjAzNDk2MDE2NH0.U0W-gzxacfecnN3ZlW4KYGeLfKfu1k5ku2zkdap5oas";
-const SUPABASE_URL = "https://wzjauuciypywyyryrcvt.supabase.co";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-const { data: { user } } = await supabase.auth.getUser()
-console.log(user);  
+import { useAtom } from "jotai";
+import { supabaseAtom } from "../App";
+
 function Messages() {
+  const [supabase] = useAtom(supabaseAtom);
+ // console.log(supabase.auth.getSession());
   const [receivedMessage, setReceivedMessage] = useState<string>("");
   const message = useRef("");
   function sendMessage(data: string) {
@@ -20,7 +18,7 @@ function Messages() {
     });
   }, []);
   return (
-    <div>
+    <div className="bg-custom_background w-full">
       <input
         type="text"
         onChange={(e) => {

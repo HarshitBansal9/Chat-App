@@ -1,10 +1,14 @@
 import express from 'express';
 import {createServer} from 'http';
 import {Server} from 'socket.io';
+import friendsRoute from "./routes/friends.js";
 import cors from 'cors';
 
 const app = express();
 app.use(cors());
+app.use("/friends",friendsRoute);
+
+
 const httpServer =  createServer(app);
 const io = new Server(httpServer,{
     cors: {

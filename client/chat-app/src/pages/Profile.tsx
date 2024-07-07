@@ -2,7 +2,7 @@ import React from 'react'
 
 function Profile() {
   return (
-    <div>Profile</div>
+    <div className="bg-custom_background w-full">Profile</div>
   )
 }
 

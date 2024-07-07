@@ -8,6 +8,7 @@ export default {
       },
       colors: {
         "navbar_background": "#1a1d20",
+        "custom_background":"#222429"
       }
     },
   },
