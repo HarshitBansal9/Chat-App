@@ -72,11 +72,13 @@ type BoxProps = {
 
 function Navbar_option(props: BoxProps) {
     const [supabase] = useAtom(supabaseAtom);
+    const [session,setSession] = useAtom(sessionAtom)
     const navigate = useNavigate();
     return (
         <div onClick={()=>{
             if(props.to==='/login'){
                 supabase.auth.signOut();
+                setSession(null);
             }
             navigate(props.to)}} className='z-0 flex flex-row items-center relative'>
                 {props.selected?(<div className='absolute top-0 left-0 z-10 bg-gradient-to-r from-violet-900 to-navbar_background w-6 h-full'></div>):(<div className='z-10'></div>)}

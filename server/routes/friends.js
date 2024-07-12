@@ -29,7 +29,6 @@ router.get("/getmembers", async (req, res) => {
     console.error(error.message);
   }
 });
-
 router.get("/getrequests", async (req, res) => {
   try {
     const id = getUserId(req);
@@ -43,27 +42,46 @@ router.get("/getrequests", async (req, res) => {
   }
 });
 
+router.post("/removefriend", async (req, res) => {
+  try {
+    const id = getUserId(req);
+    console.log('ran');
+    await pool.query(
+      "DELETE FROM friends where ((user1_id = $1 and user2_id = $2)or(user1_id = $2 and user2_id = $1)) and accepted = true",
+      [req.query.sender, id]
+    );
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
 router.get("/getdetails", async (req, res) => {
   try {
     const id = getUserId(req);
-    const [allMembers, allRequests, allFriends] = await Promise.all([
-      pool.query(
-        "select * from users u where u.auth_user_id != $1 and u.auth_user_id IN (SELECT user2_id from friends where user1_id= $1)",
-        [id]
-      ),
-      pool.query(
-        "select * from users u inner join friends f on (f.user1_id = u.auth_user_id) where f.user2_id = $1",
-        [id]
-      ),
-      pool.query(
-        "SELECT * FROM friends where user1_id = $1 and accepted = true or user2_id = $1 and accepted = true",
-        [id]
-      ),
-    ]);
+    const [allMembers, receivedRequests, allFriends, sentRequests] =
+      await Promise.all([
+        pool.query(
+          "select * from users u where u.auth_user_id != $1 and u.auth_user_id  NOT IN (SELECT user2_id from friends where user1_id= $1) and u.auth_user_id NOT IN (SELECT user1_id from friends)",
+          [id]
+        ),
+        pool.query(
+          "select * from users u inner join friends f on (f.user1_id = u.auth_user_id) where f.user2_id = $1 and f.accepted = false",
+          [id]
+        ),
+        pool.query(
+          "SELECT * FROM friends f inner join users u on (((f.user2_id = u.auth_user_id) and (f.user1_id = $1 and f.accepted = true )) or ((f.user1_id = u.auth_user_id) and (f.user2_id = $1 and f.accepted = true)));",
+          [id]
+        ),
+        pool.query(
+          "SELECT * FROM friends f inner join users u on (f.user2_id = u.auth_user_id) where f.user1_id = $1 and f.accepted = false",
+          [id]
+        ),
+      ]);
     res.json({
       allMembers: allMembers.rows,
-      allRequests: allRequests.rows,
+      allRequests: receivedRequests.rows,
       allFriends: allFriends.rows,
+      sentRequests: sentRequests.rows,
     });
   } catch (error) {
     console.error(error.message);
@@ -76,4 +94,32 @@ router.post("/sendrequest", async (req, res) => {
     [req.query.sender, req.query.receiver, false]
   );
 });
+
+router.post("/cancelrequest", async (req, res) => {
+  await pool.query(
+    "DELETE FROM friends where user1_id = $1 and user2_id = $2",
+    [req.query.sender, req.query.receiver]
+  );
+});
+
+router.post("/handlerequest", async (req, res) => {
+  try {
+    if (req.query.action === "accept") {
+      console.log("ran true");
+      await pool.query(
+        "UPDATE friends SET accepted = true where user1_id = $1 and user2_id = $2",
+        [req.query.sender, req.query.receiver]
+      );
+    } else {
+      console.log("ran false")
+      await pool.query(
+        "DELETE FROM friends where ((user1_id = $1 and user2_id = $2) or (user1_id = $2 and user2_id = $1)) and accepted = false",
+        [req.query.sender, req.query.receiver]
+      );
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
 export default router;
