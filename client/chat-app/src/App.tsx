@@ -10,6 +10,7 @@ import  config  from '../config';
 import { Session, UserResponse, createClient } from "@supabase/supabase-js";
 import { useEffect } from "react";
 import dataFetch from "./axios";
+import { io } from "socket.io-client";
 const SUPABASE_KEY = config.SUPABASE_KEY || '';
 const SUPABASE_URL = config.SUPABASE_URL || '';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -23,6 +24,10 @@ function App() {
     async function getSession(){
       const session = await supabase.auth.getSession();
       dataFetch.defaults.headers.jwt_token = session?.data.session?.access_token || '';
+      const socket = io('http://localhost:3001');
+      socket.on('connect',async ()=>{
+        await dataFetch.post('/auth/updateSocketId',null,{params:{socketId:socket.id}});
+      })
       setSession(session.data.session)
     }
     async function getUser(){

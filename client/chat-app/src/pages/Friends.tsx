@@ -14,7 +14,6 @@ function Friends() {
       setSentRequests(details.data.sentRequests);
       setMembers(details.data.allMembers);
       setRequests(details.data.allRequests);
-      console.log(details.data.allFriends);
       setFriends(details.data.allFriends)
     }
     getDetails();
