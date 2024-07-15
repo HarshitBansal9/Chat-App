@@ -2,6 +2,7 @@ import { useAtom } from "jotai"
 import { currentFriends,currentSentRequests, currentMembers, currentRequests } from "../lib/Atoms";
 import { userAtom } from "../App";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import dataFetch from "../axios";
 function Friends() {
   const [requests,setRequests] = useAtom(currentRequests);
@@ -19,11 +20,11 @@ function Friends() {
     getDetails();
   },[]);
   return (
-    <div className="bg-custom_background w-full flex flex-col">
+    <div className="bg-custom_background w-5/6 flex flex-col">
       <div className="friends flex flex-col">
-        <div className="w-full font-pixel text-gray-200 text-2xl p-4">Friends</div>
-        {(friends.length === 0)?(<div className="font-pixel text-stone-500 text-lg pl-4 pt-2">No current friends</div>):(
-          <div className="font-pixel text-lg pl-4 pt-2 flex flex-row">
+        <div className="w-full font-varela text-gray-200 text-2xl p-4">Friends</div>
+        {(friends.length === 0)?(<div className="font-varela text-stone-500 text-lg pl-4 pt-2">No current friends</div>):(
+          <div className="font-varela text-lg pl-4 pt-2 flex flex-row">
             {friends.map((friend:any) => {
               return <FriendCard key={friend.id} username={friend.username} id={friend.auth_user_id}></FriendCard>
             })}
@@ -31,9 +32,9 @@ function Friends() {
         )}
       </div>
       <div className="friends flex flex-col">
-        <div className="w-full font-pixel text-gray-200 text-2xl p-4">Current Requests</div>
-        {(requests.length === 0)?(<div className="font-pixel text-stone-500 text-lg pl-4 pt-2">No current requests</div>):(
-          <div className="font-pixel text-lg pl-4 pt-2 flex flex-row">
+        <div className="w-full font-varela text-gray-200 text-2xl p-4">Current Requests</div>
+        {(requests.length === 0)?(<div className="font-varela text-stone-500 text-lg pl-4 pt-2">No current requests</div>):(
+          <div className="font-varela text-lg pl-4 pt-2 flex flex-row">
             {requests.map((request:any) => {
               return <RequestCard key={request.id} username={request.username} id={request.user1_id}></RequestCard>
             })}
@@ -41,9 +42,9 @@ function Friends() {
         )}
       </div>
       <div className="friends flex flex-col">
-        <div className="w-full font-pixel text-gray-200 text-2xl p-4">Other Members</div>
-        {(members.length === 0)?(<div className="font-pixel text-stone-500 text-lg pl-4 pt-2">No current members</div>):(
-          <div className="font-pixel text-lg pl-4 pt-2 flex flex-row">
+        <div className="w-full font-varela text-gray-200 text-2xl p-4">Other Members</div>
+        {(members.length === 0)?(<div className="font-varela text-stone-500 text-lg pl-4 pt-2">No current members</div>):(
+          <div className="font-varela text-lg pl-4 pt-2 flex flex-row">
             {members.map((member:any) => {
               return <MemberCard key={member.id} username={member.username} id={member.auth_user_id}></MemberCard>
             })}
@@ -51,9 +52,9 @@ function Friends() {
         )}
       </div> 
       <div className="friends flex flex-col">
-        <div className="w-full font-pixel text-gray-200 text-2xl p-4">Sent Requests</div>
-        {(sentRequests.length === 0)?(<div className="font-pixel text-stone-500 text-lg pl-4 pt-2">No requests sent</div>):(
-          <div className="font-pixel text-lg pl-4 pt-2 flex flex-row">
+        <div className="w-full font-varela text-gray-200 text-2xl p-4">Sent Requests</div>
+        {(sentRequests.length === 0)?(<div className="font-varela text-stone-500 text-lg pl-4 pt-2">No requests sent</div>):(
+          <div className="font-varela text-lg pl-4 pt-2 flex flex-row">
             {sentRequests.map((request:any) => {
               return <SentRequestCard key={request.id} username={request.username} id={request.auth_user_id}></SentRequestCard>
             })}
@@ -122,7 +123,9 @@ function MemberCard(props:MemberCardProps){
     </div>
   )
 }
+
 function FriendCard(props:MemberCardProps){
+  const navigate = useNavigate();
   const [allMembers,setAllMembers]:any = useAtom(currentMembers);
   const [friends,setFriends]:any = useAtom(currentFriends);
   function removeFriend(){
@@ -136,11 +139,19 @@ function FriendCard(props:MemberCardProps){
       console.error(error);
     }
   }
+  function createChat(){
+    try{
+      navigate('/');
+      dataFetch.post('/friends/createChat',null,{params:{isGroup:false,chatName:null,user:props.id}})
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <div className="flex flex-col p-6 border-2 rounded-lg border-gray-500">
       <div className="text-gray-200 pb-4">{props.username}</div>
       <div>
-        <button className="p-2 border-[1px] border-gray-500 rounded-lg text-gray-200 hover:cursor:pointer hover:bg-navbar_background">Chat</button>
+        <button onClick={()=>{createChat()}} className="p-2 border-[1px] border-gray-500 rounded-lg text-gray-200 hover:cursor:pointer hover:bg-navbar_background">Chat</button>
         <button onClick={()=>{removeFriend()}} className="p-2 border-[1px] border-gray-500 rounded-lg text-gray-200 hover:cursor:pointer hover:bg-navbar_background">Remove Friend</button>
       </div>
     </div>

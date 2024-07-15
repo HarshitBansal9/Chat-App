@@ -2,15 +2,12 @@ import express from "express";
 import pool from "../db.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import pkg from "@supabase/supabase-js";
-const { createClient } = pkg;
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 const router = express.Router();
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
-const SUPABASE_URL = process.env.SUPABASE_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
 function getUserId(req) {
   const token = req.headers.jwt_token;
@@ -42,10 +39,27 @@ router.get("/getrequests", async (req, res) => {
   }
 });
 
+router.post("/createchat", async (req, res) => {
+  try {
+    const id = getUserId(req);
+    const uuid = await uuidv4();
+    await pool.query(
+      "INSERT INTO chats (chat_id,created_by,is_group,chat_name) VALUES ($1,$2,$3,$4)",
+      [uuid,id, req.query.isGroup, req.query.chatName]
+    ),
+    await pool.query(
+      "insert into chat_participants (chat_id, user_id) values ($1,$2),($1,$3)",
+      [uuid,id,req.query.user]
+    )
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
 router.post("/removefriend", async (req, res) => {
   try {
     const id = getUserId(req);
-    console.log('ran');
+    console.log("ran");
     await pool.query(
       "DELETE FROM friends where ((user1_id = $1 and user2_id = $2)or(user1_id = $2 and user2_id = $1)) and accepted = true",
       [req.query.sender, id]
@@ -111,7 +125,7 @@ router.post("/handlerequest", async (req, res) => {
         [req.query.sender, req.query.receiver]
       );
     } else {
-      console.log("ran false")
+      console.log("ran false");
       await pool.query(
         "DELETE FROM friends where ((user1_id = $1 and user2_id = $2) or (user1_id = $2 and user2_id = $1)) and accepted = false",
         [req.query.sender, req.query.receiver]

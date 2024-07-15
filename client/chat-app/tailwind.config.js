@@ -4,11 +4,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        "pixel":["Pixelify Sans","sans-serif"],
+        "varela":["Varela Round","sans-serif"],
       },
       colors: {
         "navbar_background": "#1a1d20",
-        "custom_background":"#222429"
+        "custom_background":"#222528",
+        "light_gray":"#2D2E32",
       }
     },
   },

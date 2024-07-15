@@ -3,13 +3,14 @@ import {createServer} from 'http';
 import {Server} from 'socket.io';
 import friendsRoute from "./routes/friends.js";
 import authRoute from "./routes/auth.js";
+import chatRoute from "./routes/chats.js";
 import cors from 'cors';
 
 const app = express();
 app.use(cors());
 app.use("/friends",friendsRoute);
 app.use("/auth",authRoute);
-
+app.use("/chats",chatRoute);
 
 const httpServer =  createServer(app);
 const io = new Server(httpServer,{

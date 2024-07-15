@@ -11,17 +11,17 @@ function Login() {
     console.log(data, error);
   }
   return (
-    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-custom_background px-4">
+    <div className="flex min-h-[100dvh] w-5/6 items-center justify-center bg-custom_background px-4">
       <div className="mx-auto max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight font-pixel text-gray-200">
+          <h1 className="text-4xl font-bold tracking-tight font-varela text-gray-200">
             Welcome to Finance App
           </h1>
-          <p className="mt-2 text-gray-500 font-pixel text-lg ">
+          <p className="mt-2 text-gray-500 font-varela text-lg ">
             Sign in to access your financial dashboard.
           </p>
         </div>
-        <button onClick={()=>{loginWithProvider()}} className="flex w-full items-center justify-center font-pixel gap-2 rounded-md border-gray-300 bg-gray-200 px-4 py-2 text-gray-900 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2">
+        <button onClick={()=>{loginWithProvider()}} className="flex w-full items-center justify-center font-varela gap-2 rounded-md border-gray-300 bg-gray-200 px-4 py-2 text-gray-900 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2">
           <ChromeIcon className="h-6 w-6" />
           Sign in with Google
         </button>
