@@ -26,8 +26,6 @@ function App() {
     async function getSession(){
       const session = await supabase.auth.getSession();
       dataFetch.defaults.headers.jwt_token = session?.data.session?.access_token || '';
-      const chats = await dataFetch.get('/chats/getchats');
-      setChats(chats.data);
       const socket = io('http://localhost:3001');
       socket.on('connect',async ()=>{
         await dataFetch.post('/auth/updateSocketId',null,{params:{socketId:socket.id}});

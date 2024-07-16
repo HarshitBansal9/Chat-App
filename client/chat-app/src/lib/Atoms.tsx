@@ -4,3 +4,4 @@ export const currentRequests = atom([]);
 export const currentChats = atom([]);
 export const currentMembers = atom([]);
 export const currentSentRequests = atom([]);   
+export const openedChat = atom<string | null>(null);

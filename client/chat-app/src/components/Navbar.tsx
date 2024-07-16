@@ -47,7 +47,7 @@ function Navbar() {
         path = '/logout';
     }
   return (
-    <div className="bg-navbar_background h-[100vh] w-1/6 flex flex-col p-2">
+    <div className="bg-navbar_background h-[100dvh] w-1/6 flex flex-col p-2">
         <div className="w-full flex items-center  justify-center flex-row gap-4 pl-6 pr-6 pt-6 pb-8">
             <Bot color="white" size={40}></Bot>
             <div className="font-varela text-3xl text-center text-gray-100">Chat App</div>

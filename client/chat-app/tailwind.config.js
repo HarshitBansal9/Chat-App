@@ -7,7 +7,7 @@ export default {
         "varela":["Varela Round","sans-serif"],
       },
       colors: {
-        "navbar_background": "#1a1d20",
+        "navbar_background": "#1A1C21",
         "custom_background":"#222528",
         "light_gray":"#2D2E32",
       }

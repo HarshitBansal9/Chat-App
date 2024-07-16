@@ -1,7 +1,7 @@
 -- migrate:up
 create or replace function public.add_to_users() returns trigger as $$ 
 begin 
-insert into public.users (username,auth_user_id) values (new.raw_user_meta_data->>'name',new.id);
+insert into public.users (username,auth_user_id,image_url) values (new.raw_user_meta_data->>'name',new.id,new.raw_user_meta_data->>'avatar_url');
 return new;
 end;
 $$ language plpgsql security definer;
