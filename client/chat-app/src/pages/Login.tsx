@@ -5,7 +5,7 @@ function Login() {
   async function loginWithProvider() {
     console.log("reahced here")
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google'    
+      provider: 'google',
     });
     
     console.log(data, error);

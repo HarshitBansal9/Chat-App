@@ -13,6 +13,10 @@ function getUserId(req) {
   return user.sub;
 }
 
+// ORMs
+
+// Query Builders
+
 router.get("/getchats", async (req, res) => {
   const id = getUserId(req);
   const userChats = await pool.query(
@@ -21,4 +25,19 @@ router.get("/getchats", async (req, res) => {
   );
   res.json(userChats.rows);
 });
+
+router.get("/getmessages", async (req, res) => {
+  const id = getUserId(req);
+  const messages = await pool.query(
+    "select cp.chat_id,m.message_text,m.sender_id,m.sent_at,m.image_url as message_image,u.username,u.image_url as sender_image from (chat_participants cp inner join messages m on (cp.chat_id = m.chat_id)) inner join users u on (m.sender_id = u.auth_user_id) where cp.user_id = $1 order by m.sent_at",
+    [id]
+  );
+  res.json(messages.rows);
+})
+router.post("/sendmessage",async (req,res)=>{
+  const id = getUserId(req);
+  const {chatId,messageText,time,image} = req.query;
+  const newMessage = await pool.query("INSERT INTO messages (chat_id,sender_id,message_text,image_url,sent_at) VALUES ($1,$2,$3,$4,$5) RETURNING *",[chatId,id,messageText,image,time]);
+  res.json(newMessage.rows[0]);
+})
 export default router;

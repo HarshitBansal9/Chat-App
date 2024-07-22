@@ -10,6 +10,8 @@ export default {
         "navbar_background": "#1A1C21",
         "custom_background":"#222528",
         "light_gray":"#2D2E32",
+        "right_message":"#1A7071",
+        "left_message":"#2D2E32",
       }
     },
   },
