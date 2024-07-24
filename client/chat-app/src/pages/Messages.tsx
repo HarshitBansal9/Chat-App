@@ -4,12 +4,13 @@ import { Search } from "lucide-react";
 import { useAtom } from "jotai";
 import dataFetch from "../axios";
 import { sessionAtom } from "../App";
-import { currentChats, openedChat, globalSocket } from "../lib/Atoms";
+import { currentChats, openedChat, globalSocket,userDetails } from "../lib/Atoms";
 import OpenChat from "../components/OpenChat";
 function Messages() {
   const [userSocket, setUserSocket] = useAtom(globalSocket);
   const [session, setSession] = useAtom(sessionAtom);
   const [messages, setMessages] = useState([]);
+  const [user,setUser] = useAtom(userDetails);
   useEffect(() => {
     let socket: any;
     if (session) {
@@ -31,7 +32,12 @@ function Messages() {
       setMessages(messages.data);
     }
     getMessages();
-
+    async function getUserDetails(){
+      const userDetails = await dataFetch.get("/profile/getuserdetails");
+      console.log("Useer Detilas",userDetails.data);
+      setUser(userDetails.data);
+    }
+    getUserDetails();
     return () => {
       socket?.disconnect();
     };
@@ -63,7 +69,7 @@ function Messages() {
           })}
         </div>
       </div>
-      <div className="h-full w-3/4">
+      <div className="h-screen w-3/4">
         {currentChat == null ? (
           <div className="w-full h-full flex justify-center items-center text-xl text-gray-200 font-varela">
             No Chats selected yet.
@@ -77,6 +83,7 @@ function Messages() {
             oldMessages={messages.filter((msg: any) => {
               return msg.chat_id == currentChat?.chat_id;
             })}
+            sender_image={(user?.image_url)}
           />
         )}
       </div>

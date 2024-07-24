@@ -26,6 +26,7 @@ router.get("/getchats", async (req, res) => {
   res.json(userChats.rows);
 });
 
+
 router.get("/getmessages", async (req, res) => {
   const id = getUserId(req);
   const messages = await pool.query(
@@ -34,6 +35,7 @@ router.get("/getmessages", async (req, res) => {
   );
   res.json(messages.rows);
 })
+
 router.post("/sendmessage",async (req,res)=>{
   const id = getUserId(req);
   const {chatId,messageText,time,image} = req.query;

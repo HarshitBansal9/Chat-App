@@ -8,7 +8,6 @@ dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
 function getUserId(req) {
   const token = req.headers.jwt_token;
   const user = jwt.verify(token, JWT_SECRET);

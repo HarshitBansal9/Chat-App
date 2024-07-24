@@ -1,5 +1,5 @@
 import { Star, User, Send, Smile } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dataFetch from "../axios";
 import { useAtom } from "jotai";
 import { userAtom } from "../App";
@@ -13,6 +13,7 @@ interface OpenChat {
   name: string;
   image: string;
   oldMessages: any;
+  sender_image: string | undefined;
 }
 interface Message {
   sender_id: string | undefined;
@@ -20,14 +21,43 @@ interface Message {
   message: string;
   time: string;
   message_image?: string | null;
-  sender_image?: string | null;
+  sender_image: string | undefined;
   chatId?: string;
 }
-function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
+function OpenChat({
+  chat_id,
+  isGroup,
+  name,
+  image,
+  oldMessages,
+  sender_image,
+}: OpenChat) {
+  const listRef = useRef<HTMLDivElement>(null);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [user, setUser] = useAtom(userAtom);
+  const [txt, setTxt] = useState("");
   const [userSocket, setUserSocket] = useAtom(globalSocket);
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+
+    // Days of the week array
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Get day, date, and time
+    const dayOfWeek = daysOfWeek[date.getUTCDay()];
+    const dateOfMonth = date.getUTCDate();
+    const month = date.toLocaleString("default", { month: "short" });
+    const time = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Format the output
+    const formattedDate = `${dateOfMonth} ${month} ${time}`;
+
+    return formattedDate;
+  }
   useEffect(() => {
     setAllMessages(
       oldMessages.map((msg: any) => {
@@ -43,7 +73,16 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
     );
   }, [oldMessages]);
   useEffect(() => {
+    console.log("Sender image", sender_image);
+  }, []);
+  useEffect(() => {
+    //3️⃣ bring the last item into view
+    listRef.current?.lastElementChild?.scrollIntoView();
+  }, [allMessages]);
+
+  useEffect(() => {
     const handler = (msg: Message) => {
+      console.log(msg);
       setAllMessages((allMessages) => [...allMessages, msg]);
     };
     userSocket?.on("receive_message", handler);
@@ -53,6 +92,7 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
     };
   }, [userSocket]);
   async function sendMessage(message: Message | null) {
+    setTxt("");
     if (message != null) {
       let test = {
         message: message.message,
@@ -60,6 +100,7 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
         time: message.time,
         message_image: message.message_image,
         chatId: chat_id,
+        sender_image: sender_image,
       };
       userSocket?.emit("send_message", test);
       setAllMessages([...allMessages, message]);
@@ -98,18 +139,39 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
           </div>
         </div>
       </div>
-      <div className="body flex flex-col h-full w-full">
+      <div
+        ref={listRef}
+        className="body flex flex-col h-full w-full overflow-y-auto scrollbar scrollbar-thumb-slate-700"
+      >
         {allMessages.map((msg, idx) => {
-          return (
-            <div
-              key={idx}
-              className={
-                msg.sender_id == user?.data.user?.id
-                  ? "message bg-right_message ml-auto mt-2 mb-2 p-2 rounded-3xl"
-                  : "message bg-light_gray mr-auto mt-2 mb-2 p-2 rounded-3xl"
-              }
-            >
-              {msg.message}
+          return msg.sender_id == user?.data.user?.id ? (
+            <div key={idx} className="flex flex-col mt-4 ml-auto mr-4">
+              <div className="p-3  max-w-[500px] bg-right_message text-gray-200 font-varela rounded-lg">
+                {msg.message}
+              </div>
+              <div className="text-xs text-gray-400 font-varela mr-auto">
+                {formatDate(msg.time)}
+              </div>
+            </div>
+          ) : (
+            <div key={idx} className="flex flex-col mt-4 mr-auto ml-4">
+              <div className="flex flex-row">
+                {msg.sender_image != undefined ? (
+                  <img
+                    src={msg.sender_image}
+                    alt=""
+                    className="h-9 w-9 mt-auto mb-1 mr-2 rounded-full"
+                  />
+                ) : (
+                  <div></div>
+                )}
+                <div className="p-3  max-w-[500px] bg-left_message text-gray-200 font-varela rounded-lg">
+                  {msg.message}
+                </div>
+              </div>
+              <div className="text-xs text-gray-400 font-varela ml-auto">
+                {formatDate(msg.time)}
+              </div>
             </div>
           );
         })}
@@ -124,11 +186,19 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
         </div>
         <div className="form-control w-10/12">
           <input
+            value={txt}
+            onKeyDown={(e) => {
+              e.key === "Enter"
+                ? sendMessage(message)
+                : console.log("Not the enter key");
+            }}
             onChange={(e) => {
+              setTxt(e.target.value);
               setMessage({
                 message: e.target.value,
                 sender_id: user?.data.user?.id,
                 time: new Date().toISOString().slice(0, 19).replace("T", " "),
+                sender_image: sender_image,
               });
             }}
             className="input input-alt"
@@ -153,6 +223,28 @@ function OpenChat({ chat_id, isGroup, name, image, oldMessages }: OpenChat) {
       </div>
     </div>
   );
+}
+
+interface MessageCardProps {
+  text: string;
+  image_url?: string;
+  sender_name: string;
+  sender_id: string;
+  sender_image: string;
+  timestamp: string;
+  right: boolean;
+}
+
+function MessageCard({
+  text,
+  image_url,
+  sender_name,
+  sender_id,
+  sender_image,
+  timestamp,
+  right,
+}: MessageCardProps) {
+  return <div className="p-2 rounded-xl">{text}</div>;
 }
 
 export default OpenChat;

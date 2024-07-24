@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import friendsRoute from "./routes/friends.js";
 import chatRoute from "./routes/chats.js";
+import profileRoute from "./routes/profile.js";
 import cors from "cors";
 import pool from "./db.js";
 import jwt from "jsonwebtoken";
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use("/friends", friendsRoute);
 app.use("/chats", chatRoute);
+app.use("/profile",profileRoute);
 
 export const httpServer = createServer(app);
 const io = new Server(httpServer, {
