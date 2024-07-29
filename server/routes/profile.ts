@@ -1,15 +1,15 @@
 import express from "express";
 import pool from "../db.js";
 import dotenv from "dotenv";
+import config from "@config";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
-
-function getUserId(req) {
+function getUserId(req:any) {
   const token = req.headers.jwt_token;
-  const user = jwt.verify(token, JWT_SECRET);
+  const user = jwt.verify(token, config.JWT_SECRET);
   return user.sub;
 }
 

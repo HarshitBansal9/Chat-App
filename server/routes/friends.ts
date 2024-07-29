@@ -3,14 +3,15 @@ import pool from "../db.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from 'uuid';
+import config from "@config";
 
 dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-function getUserId(req) {
+function getUserId(req:any) {
   const token = req.headers.jwt_token;
-  const user = jwt.verify(token, JWT_SECRET);
+  const user = jwt.verify(token,config.JWT_SECRET);
   return user.sub;
 }
 router.get("/getmembers", async (req, res) => {
@@ -22,7 +23,7 @@ router.get("/getmembers", async (req, res) => {
     );
     res.json(allFriends.rows);
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 router.get("/getrequests", async (req, res) => {
@@ -34,7 +35,7 @@ router.get("/getrequests", async (req, res) => {
     );
     res.json(allRequests.rows);
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 
@@ -51,7 +52,7 @@ router.post("/createchat", async (req, res) => {
       [uuid,id,req.query.user]
     )
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 
@@ -64,7 +65,7 @@ router.post("/removefriend", async (req, res) => {
       [req.query.sender, id]
     );
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 
@@ -97,7 +98,7 @@ router.get("/getdetails", async (req, res) => {
       sentRequests: sentRequests.rows,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 
@@ -131,7 +132,7 @@ router.post("/handlerequest", async (req, res) => {
       );
     }
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 });
 
