@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const db_js_1 = __importDefault(require("../db.js"));
+const db_1 = __importDefault(require("../db"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const _config_1 = __importDefault(require("@config"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -18,7 +18,7 @@ function getUserId(req) {
 }
 router.get("/getuserdetails", async (req, res) => {
     const id = getUserId(req);
-    const userDetails = await db_js_1.default.query("select * from users where auth_user_id = $1", [id]);
+    const userDetails = await db_1.default.query("select * from users where auth_user_id = $1", [id]);
     res.json(userDetails.rows);
 });
 exports.default = router;

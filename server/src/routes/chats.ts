@@ -1,9 +1,9 @@
 import express from "express";
-import pool from "../db.js";
+import pool from "../db";
 import config from "@config";
 import jwt from "jsonwebtoken";
 import Chat from "src/dao/chatsClass";
-import expressAuthMiddleware from "src/expressAuthMiddleware.js";
+import expressAuthMiddleware from "../expressAuthMiddleware";
 const router = express.Router();
 
 interface ChatMessage {

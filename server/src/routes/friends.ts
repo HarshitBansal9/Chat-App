@@ -1,17 +1,17 @@
 import express from "express";
-import pool from "../db.js";
+import pool from "../db";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import config from "@config";
 
 dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-function getUserId(req:any) {
+function getUserId(req: any) {
   const token = req.headers.jwt_token;
-  const user = jwt.verify(token,config.JWT_SECRET);
+  const user = jwt.verify(token, config.JWT_SECRET);
   return user.sub;
 }
 router.get("/getmembers", async (req, res) => {
@@ -45,12 +45,12 @@ router.post("/createchat", async (req, res) => {
     const uuid = await uuidv4();
     await pool.query(
       "INSERT INTO chats (chat_id,created_by,is_group,chat_name) VALUES ($1,$2,$3,$4)",
-      [uuid,id, req.query.isGroup, req.query.chatName]
+      [uuid, id, req.query.isGroup, req.query.chatName]
     ),
-    await pool.query(
-      "insert into chat_participants (chat_id, user_id) values ($1,$2),($1,$3)",
-      [uuid,id,req.query.user]
-    )
+      await pool.query(
+        "insert into chat_participants (chat_id, user_id) values ($1,$2),($1,$3)",
+        [uuid, id, req.query.user]
+      );
   } catch (error) {
     console.error(error);
   }

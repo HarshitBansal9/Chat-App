@@ -1,12 +1,12 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import friendsRoute from "./routes/friends.js";
-import chatRoute from "./routes/chats.js";
-import profileRoute from "./routes/profile.js";
+import friendsRoute from "./routes/friends";
+import chatRoute from "./routes/chats";
+import profileRoute from "./routes/profile";
 import cors from "cors";
 import config from "@config";
-import pool from "./db.js";
+import pool from "./db";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -16,7 +16,7 @@ const app = express();
 app.use(cors());
 app.use("/friends", friendsRoute);
 app.use("/chats", chatRoute);
-app.use("/profile",profileRoute);
+app.use("/profile", profileRoute);
 
 export const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -26,10 +26,10 @@ const io = new Server(httpServer, {
   },
 });
 io.of("/chat").on("connection", async (socket) => {
-    const token = socket.handshake.query.token;
+  const token = socket.handshake.query.token;
 
-    const user = await jwt?.verify(token?.toString() ?? "", JWT_SECRET);
-    const chatIds = await pool.query(
+  const user = await jwt?.verify(token?.toString() ?? "", JWT_SECRET);
+  const chatIds = await pool.query(
     "Select cp.chat_id from users u inner join chat_participants cp on (u.auth_user_id = cp.user_id) where u.auth_user_id = $1",
     [user.sub]
   );
