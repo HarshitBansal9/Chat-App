@@ -27,6 +27,10 @@ function App() {
       const session = await supabase.auth.getSession();
       dataFetch.defaults.headers.jwt_token =
         session?.data.session?.access_token || "";
+      console.log(String(dataFetch.defaults.headers.Authorization).length); 
+      if(dataFetch.defaults.headers.Authorization != null && String(dataFetch.defaults.headers.Authorization).split(' ')[1]===""){
+        dataFetch.defaults.headers.Authorization += session?.data.session?.access_token || "";
+      }
       setSession(session.data.session);
     }
     async function getUser() {

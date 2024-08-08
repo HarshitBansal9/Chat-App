@@ -7,7 +7,6 @@ function Login() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
     });
-    
     console.log(data, error);
   }
   return (
@@ -15,10 +14,10 @@ function Login() {
       <div className="mx-auto max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight font-varela text-gray-200">
-            Welcome to Finance App
+            Welcome to Chat App
           </h1>
           <p className="mt-2 text-gray-500 font-varela text-lg ">
-            Sign in to access your financial dashboard.
+            Sign in to continue
           </p>
         </div>
         <button onClick={()=>{loginWithProvider()}} className="flex w-full items-center justify-center font-varela gap-2 rounded-md border-gray-300 bg-gray-200 px-4 py-2 text-gray-900 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2">

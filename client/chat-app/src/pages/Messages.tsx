@@ -23,8 +23,12 @@ function Messages() {
     }
 
     async function getChats() {
+      try {
       const chats = await dataFetch.get("/chats/getchats");
       setChats(chats.data);
+      } catch (error){
+        console.log("Error",error);
+      }
     }
     getChats();
     async function getMessages() {

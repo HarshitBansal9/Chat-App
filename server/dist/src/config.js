@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 exports.JWT_SECRET = process.env.JWT_SECRET;
 function setup() {
+    console.log(exports.JWT_SECRET);
     if (!exports.JWT_SECRET) {
         throw new Error('JWT_SECRET not set');
     }
