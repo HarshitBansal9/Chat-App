@@ -44,7 +44,7 @@ class Chat {
             "m.message_text",
             "m.sender_id",
             "m.sent_at",
-            "m.image_url as message_image_url",
+            "m.image_url as message_image",
             "u.username",
             "u.image_url as sender_image",
         ])

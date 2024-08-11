@@ -1,7 +1,6 @@
 import { db } from "../database";
 import { v4 as uuidv4 } from "uuid";
 class Chat {
-
   //create a new uui
   async createUUID() {
     const uuid = await uuidv4();
@@ -30,16 +29,26 @@ class Chat {
   //Sending a chat message
   async sendChatMessage(message: ChatMessage) {
     const { chatId, messageText, timestamp, imageUrl } = message;
+    console.log(imageUrl);
     const messageId = await db
       .insertInto("messages")
-      .columns(["chat_id", "sender_id", "message_text", "sent_at", "image_url"])
+      //.columns(["chat_id", "sender_id", "message_text", "sent_at", "image_url"])
       .returning("message_id")
-      .values([chatId, this.userId, messageText, timestamp, imageUrl])
+      .values({
+        chat_id: chatId,
+        sender_id: this.userId,
+        message_text: messageText,
+        sent_at: timestamp,
+        image_url: imageUrl,
+      })
       .execute();
+
+    return messageId;
   }
 
   //getting all chat messages
   async getChatMessages() {
+    console.log("this.userId", this.userId);
     const messages = await db
       .selectFrom("chat_participants as cp")
       .innerJoin("messages as m", "cp.chat_id", "m.chat_id")
@@ -49,7 +58,7 @@ class Chat {
         "m.message_text",
         "m.sender_id",
         "m.sent_at",
-        "m.image_url as message_image_url",
+        "m.image_url as message_image",
         "u.username",
         "u.image_url as sender_image",
       ])
@@ -61,19 +70,19 @@ class Chat {
   }
 
   //creating a new chat
-  async createNewChat(chat: Chat) {
+  async createNewChat(chat: newChat) {
     const { user, isGroup, chatName } = chat;
     const uuid = await this.createUUID();
     const chatId = await db
       .insertInto("chats")
-      .values([
+      .values(
         {
           chat_id: uuid,
           created_by: this.userId,
           is_group: isGroup,
           chat_name: chatName,
         },
-      ])
+      )
       .execute();
 
     const chatParticipant = await db
@@ -91,8 +100,7 @@ class Chat {
       .execute();
   }
 
-  constructor(private userId: string) {
-  }
+  constructor(private userId: string) {}
 }
 
 export default Chat;
@@ -101,10 +109,10 @@ interface ChatMessage {
   chatId: string;
   messageText: string;
   timestamp: Date;
-  imageUrl: string | null;
+  imageUrl?: string | null;
 }
 
-interface Chat {
+interface newChat {
   user: string;
   isGroup: boolean;
   chatName: string | null;

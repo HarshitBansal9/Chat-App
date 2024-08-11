@@ -3,37 +3,6 @@ import { db } from "src/database";
 class Friend {
   userId: string;
 
-  //Getting all current members
-  async getFriends() {
-    try {
-      const members = await db
-        .selectFrom("users")
-        .selectAll()
-        .where("auth_user_id", "!=", this.userId)
-        .execute();
-
-      return members;
-    } catch (error) {
-      return error;
-    }
-  }
-
-  //Getting the users requests
-  async getUsersRequests() {
-    try {
-      const requests = await db
-        .selectFrom("friends")
-        .selectAll()
-        .where("friends.user2_id", "=", this.userId)
-        .where("accepted", "=", false)
-        .execute();
-
-      return requests;
-    } catch (error) {
-      return error;
-    }
-  }
-
   //Removing a friend
   async removeFriend(friendID: string) {
     try {
@@ -59,8 +28,8 @@ class Friend {
     try {
       await db
         .insertInto("friends")
-        .columns(["user1_id", "user2_id", "accepted"])
-        .values([this.userId, friendId, false])
+        //.columns(["user1_id", "user2_id", "accepted"])
+        .values({user1_id:this.userId,user2_id:friendId,accepted:false})
         .execute();
 
       return;
@@ -170,6 +139,8 @@ class Friend {
             .where("f.accepted", "=", false)
             .execute(),
         ]);
+        const details = {allMembers: allMembers, allRequests: receivedRequests, allFriends: allFriends, sentRequests: sentRequests};
+        return details;
     } catch (error) {
       return error;
     }
@@ -179,3 +150,5 @@ class Friend {
     this.userId = userID;
   }
 }
+
+export default Friend;

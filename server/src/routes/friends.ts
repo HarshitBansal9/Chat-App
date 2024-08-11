@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import config from "@config";
-
+import expressAuthMiddleware from "src/expressAuthMiddleware";
+import Friend from "src/dao/friendClass";
 dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -14,56 +15,24 @@ function getUserId(req: any) {
   const user = jwt.verify(token, config.JWT_SECRET);
   return user.sub;
 }
-router.get("/getmembers", async (req, res) => {
-  try {
-    const id = getUserId(req);
-    const allFriends = await pool.query(
-      "SELECT * FROM users where auth_user_id != $1",
-      [id]
-    );
-    res.json(allFriends.rows);
-  } catch (error) {
-    console.error(error);
-  }
-});
-router.get("/getrequests", async (req, res) => {
-  try {
-    const id = getUserId(req);
-    const allRequests = await pool.query(
-      "SELECT * FROM friends where user2_id = $1 and accepted = false",
-      [id]
-    );
-    res.json(allRequests.rows);
-  } catch (error) {
-    console.error(error);
-  }
+
+//calling the middleware for jwt token verification for every incoming request
+router.use(function (req, res, next) {
+  expressAuthMiddleware(req, res, next);
+  //const chat = new Chat(req.user.sub)
 });
 
-router.post("/createchat", async (req, res) => {
-  try {
-    const id = getUserId(req);
-    const uuid = await uuidv4();
-    await pool.query(
-      "INSERT INTO chats (chat_id,created_by,is_group,chat_name) VALUES ($1,$2,$3,$4)",
-      [uuid, id, req.query.isGroup, req.query.chatName]
-    ),
-      await pool.query(
-        "insert into chat_participants (chat_id, user_id) values ($1,$2),($1,$3)",
-        [uuid, id, req.query.user]
-      );
-  } catch (error) {
-    console.error(error);
-  }
-});
+
 
 router.post("/removefriend", async (req, res) => {
   try {
     const id = getUserId(req);
-    console.log("ran");
-    await pool.query(
+    const friend = new Friend(req.user.sub);
+    if (typeof req.query.sender === "string") {await friend.removeFriend(req.query.sender);}
+    /*await pool.query(
       "DELETE FROM friends where ((user1_id = $1 and user2_id = $2)or(user1_id = $2 and user2_id = $1)) and accepted = true",
       [req.query.sender, id]
-    );
+    );*/
   } catch (error) {
     console.error(error);
   }
@@ -72,7 +41,10 @@ router.post("/removefriend", async (req, res) => {
 router.get("/getdetails", async (req, res) => {
   try {
     const id = getUserId(req);
-    const [allMembers, receivedRequests, allFriends, sentRequests] =
+    const friend = new Friend(req.user.sub);
+    const details = await friend.getUserDetails();
+    res.json(details);
+    /*const [allMembers, receivedRequests, allFriends, sentRequests] =
       await Promise.all([
         pool.query(
           "select * from users u where u.auth_user_id != $1 and u.auth_user_id  NOT IN (SELECT user2_id from friends where user1_id= $1) and u.auth_user_id NOT IN (SELECT user1_id from friends)",
@@ -97,28 +69,49 @@ router.get("/getdetails", async (req, res) => {
       allFriends: allFriends.rows,
       sentRequests: sentRequests.rows,
     });
+    */
   } catch (error) {
     console.error(error);
   }
 });
 
 router.post("/sendrequest", async (req, res) => {
-  await pool.query(
+  const friend = new Friend(req.user.sub);
+  try {
+    if (typeof req.query.sender === "string" && typeof req.query.receiver === "string") {
+      await friend.sendFriendRequest(req.query.receiver);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  /*await pool.query(
     "INSERT INTO friends (user1_id,user2_id,accepted) VALUES ($1,$2,$3)",
     [req.query.sender, req.query.receiver, false]
-  );
+  );*/
 });
 
 router.post("/cancelrequest", async (req, res) => {
-  await pool.query(
+  const friend = new Friend(req.user.sub);
+  try {
+    if (typeof req.query.sender === "string" && typeof req.query.receiver === "string") {
+      await friend.cancelFriendRequest(req.query.receiver);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  /*await pool.query(
     "DELETE FROM friends where user1_id = $1 and user2_id = $2",
     [req.query.sender, req.query.receiver]
-  );
+  );*/
 });
 
 router.post("/handlerequest", async (req, res) => {
   try {
-    if (req.query.action === "accept") {
+    const friend = new Friend(req.user.sub);
+    if (typeof req.query.action === "string" && typeof req.query.receiver === "string") {
+      await friend.handleRequestResponse(req.query.receiver,req.query.action);
+    }
+    /*if (req.query.action === "accept") {
       console.log("ran true");
       await pool.query(
         "UPDATE friends SET accepted = true where user1_id = $1 and user2_id = $2",
@@ -131,6 +124,7 @@ router.post("/handlerequest", async (req, res) => {
         [req.query.sender, req.query.receiver]
       );
     }
+    */
   } catch (error) {
     console.error(error);
   }

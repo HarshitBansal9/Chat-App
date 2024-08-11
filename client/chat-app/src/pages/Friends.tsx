@@ -142,7 +142,7 @@ function FriendCard(props:MemberCardProps){
   function createChat(){
     try{
       navigate('/');
-      dataFetch.post('/friends/createChat',null,{params:{isGroup:false,chatName:null,user:props.id}})
+      dataFetch.post('/chats/createChat',null,{params:{isGroup:false,chatName:null,user:props.id}})
     } catch (error) {
       console.error(error);
     }

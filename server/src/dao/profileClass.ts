@@ -14,7 +14,11 @@ class Profile {
     return userDetails;
   }
 
+
   constructor(userId: string) {
     this.userId = userId;
   }
 }
+
+
+export default Profile;
