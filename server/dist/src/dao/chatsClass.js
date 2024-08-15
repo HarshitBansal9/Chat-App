@@ -26,15 +26,24 @@ class Chat {
     //Sending a chat message
     async sendChatMessage(message) {
         const { chatId, messageText, timestamp, imageUrl } = message;
+        console.log(imageUrl);
         const messageId = await database_1.db
             .insertInto("messages")
-            .columns(["chat_id", "sender_id", "message_text", "sent_at", "image_url"])
+            //.columns(["chat_id", "sender_id", "message_text", "sent_at", "image_url"])
             .returning("message_id")
-            .values([chatId, this.userId, messageText, timestamp, imageUrl])
+            .values({
+            chat_id: chatId,
+            sender_id: this.userId,
+            message_text: messageText,
+            sent_at: timestamp,
+            image_url: imageUrl,
+        })
             .execute();
+        return messageId;
     }
     //getting all chat messages
     async getChatMessages() {
+        console.log("this.userId", this.userId);
         const messages = await database_1.db
             .selectFrom("chat_participants as cp")
             .innerJoin("messages as m", "cp.chat_id", "m.chat_id")
@@ -59,14 +68,12 @@ class Chat {
         const uuid = await this.createUUID();
         const chatId = await database_1.db
             .insertInto("chats")
-            .values([
-            {
-                chat_id: uuid,
-                created_by: this.userId,
-                is_group: isGroup,
-                chat_name: chatName,
-            },
-        ])
+            .values({
+            chat_id: uuid,
+            created_by: this.userId,
+            is_group: isGroup,
+            chat_name: chatName,
+        })
             .execute();
         const chatParticipant = await database_1.db
             .insertInto("chat_participants")

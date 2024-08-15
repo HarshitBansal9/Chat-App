@@ -22,13 +22,13 @@ router.use(function (req, res, next) {
   //const chat = new Chat(req.user.sub)
 });
 
-
-
 router.post("/removefriend", async (req, res) => {
   try {
     const id = getUserId(req);
     const friend = new Friend(req.user.sub);
-    if (typeof req.query.sender === "string") {await friend.removeFriend(req.query.sender);}
+    if (typeof req.query.sender === "string") {
+      await friend.removeFriend(req.query.sender);
+    }
     /*await pool.query(
       "DELETE FROM friends where ((user1_id = $1 and user2_id = $2)or(user1_id = $2 and user2_id = $1)) and accepted = true",
       [req.query.sender, id]
@@ -43,6 +43,7 @@ router.get("/getdetails", async (req, res) => {
     const id = getUserId(req);
     const friend = new Friend(req.user.sub);
     const details = await friend.getUserDetails();
+    console.log("User details",details);
     res.json(details);
     /*const [allMembers, receivedRequests, allFriends, sentRequests] =
       await Promise.all([
@@ -78,7 +79,10 @@ router.get("/getdetails", async (req, res) => {
 router.post("/sendrequest", async (req, res) => {
   const friend = new Friend(req.user.sub);
   try {
-    if (typeof req.query.sender === "string" && typeof req.query.receiver === "string") {
+    if (
+      typeof req.query.sender === "string" &&
+      typeof req.query.receiver === "string"
+    ) {
       await friend.sendFriendRequest(req.query.receiver);
     }
   } catch (error) {
@@ -93,7 +97,10 @@ router.post("/sendrequest", async (req, res) => {
 router.post("/cancelrequest", async (req, res) => {
   const friend = new Friend(req.user.sub);
   try {
-    if (typeof req.query.sender === "string" && typeof req.query.receiver === "string") {
+    if (
+      typeof req.query.sender === "string" &&
+      typeof req.query.receiver === "string"
+    ) {
       await friend.cancelFriendRequest(req.query.receiver);
     }
   } catch (error) {
@@ -108,8 +115,11 @@ router.post("/cancelrequest", async (req, res) => {
 router.post("/handlerequest", async (req, res) => {
   try {
     const friend = new Friend(req.user.sub);
-    if (typeof req.query.action === "string" && typeof req.query.receiver === "string") {
-      await friend.handleRequestResponse(req.query.receiver,req.query.action);
+    if (
+      typeof req.query.action === "string" &&
+      typeof req.query.receiver === "string"
+    ) {
+      await friend.handleRequestResponse(req.query.receiver, req.query.action);
     }
     /*if (req.query.action === "accept") {
       console.log("ran true");

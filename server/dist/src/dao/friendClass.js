@@ -3,35 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const database_1 = require("src/database");
 class Friend {
     userId;
-    //Getting all current members
-    async getFriends() {
-        try {
-            const members = await database_1.db
-                .selectFrom("users")
-                .selectAll()
-                .where("auth_user_id", "!=", this.userId)
-                .execute();
-            return members;
-        }
-        catch (error) {
-            return error;
-        }
-    }
-    //Getting the users requests
-    async getUsersRequests() {
-        try {
-            const requests = await database_1.db
-                .selectFrom("friends")
-                .selectAll()
-                .where("friends.user2_id", "=", this.userId)
-                .where("accepted", "=", false)
-                .execute();
-            return requests;
-        }
-        catch (error) {
-            return error;
-        }
-    }
     //Removing a friend
     async removeFriend(friendID) {
         try {
@@ -54,8 +25,8 @@ class Friend {
         try {
             await database_1.db
                 .insertInto("friends")
-                .columns(["user1_id", "user2_id", "accepted"])
-                .values([this.userId, friendId, false])
+                //.columns(["user1_id", "user2_id", "accepted"])
+                .values({ user1_id: this.userId, user2_id: friendId, accepted: false })
                 .execute();
             return;
         }
@@ -105,8 +76,9 @@ class Friend {
     }
     //Getting all user details
     async getUserDetails() {
+        console.log(this.userId);
         try {
-            const [allMembers, receivedRequests, allFriends, sentRequests] = await Promise.all([
+            const [allMembers, receivedRequests, allFriends, /* sentRequests*/] = await Promise.all([
                 //get members
                 database_1.db
                     .selectFrom("users as u")
@@ -124,8 +96,8 @@ class Friend {
                 //get received requests
                 database_1.db
                     .selectFrom("users as u")
-                    .innerJoin("friends as f", "u.auth_user_id", "f.user1_id")
                     .selectAll()
+                    .innerJoin("friends as f", "u.auth_user_id", "f.user1_id")
                     .where("f.user2_id", "=", this.userId)
                     .where("f.accepted", "=", false)
                     .execute(),
@@ -141,15 +113,19 @@ class Friend {
                         .and("f.accepted", "=", true),
                 ]))
                     .execute(),
-                //get sent requests
-                database_1.db
-                    .selectFrom("friends as f")
-                    .selectAll()
-                    .innerJoin("users as u", "f.user2_id", "u.auth_user_id")
-                    .where("f.user1_id", "=", this.userId)
-                    .where("f.accepted", "=", false)
-                    .execute(),
+                /*
+               //get sent requests
+               db
+                 .selectFrom("friends as f")
+                 .selectAll()
+                 .innerJoin("users as u", "f.user2_id", "u.auth_user_id")
+                 .where("f.user1_id", "=", this.userId)
+                 .where("f.accepted", "=", false)
+                 .execute(),
+               */
             ]);
+            const details = { allMembers: allMembers, allRequests: receivedRequests, allFriends: allFriends, /* sentRequests: sentRequests*/ };
+            return details;
         }
         catch (error) {
             return error;
@@ -159,3 +135,4 @@ class Friend {
         this.userId = userID;
     }
 }
+exports.default = Friend;

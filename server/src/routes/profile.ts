@@ -18,14 +18,11 @@ function getUserId(req: any) {
 //calling the middleware for jwt token verification for every incoming request
 router.use(function (req, res, next) {
   expressAuthMiddleware(req, res, next);
-  //const chat = new Chat(req.user.sub)
 });
-
-
-
 
 router.get("/getuserdetails", async (req, res) => {
   try {
+    console.log("getting user details");
     const profile = new Profile(req.user.sub);
     const userDetails = await profile.getUserDetails();
     res.json(userDetails);

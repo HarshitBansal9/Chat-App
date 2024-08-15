@@ -36,7 +36,6 @@ router.use(function (req, res, next) {
 
 router.get("/getchats", async (req, res) => {
   const chat = new Chat(req.user.sub);
-  console.log("chat", chat);
   const id = getUserId(req);
   console.log("ran");
   const userChats = await pool.query(
@@ -51,21 +50,27 @@ router.get("/getmessages", async (req, res) => {
   const chat = new Chat(req.user.sub);
   try {
     const messages = await chat.getChatMessages();
-    console.log("messages", messages);
     res.json(messages);
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
-
 });
 
 router.post("/createchat", async (req, res) => {
   try {
     const id = getUserId(req);
     const chat = new Chat(req.user.sub);
-    if (typeof req.query.user === "string" && typeof req.query.isGroup === "boolean" && typeof req.query.chatName === "string") {
-      await chat.createNewChat({ user: req.query.user, isGroup: req.query.isGroup, chatName: req.query.chatName });
+    if (
+      typeof req.query.user === "string" &&
+      typeof req.query.isGroup === "boolean" &&
+      typeof req.query.chatName === "string"
+    ) {
+      await chat.createNewChat({
+        user: req.query.user,
+        isGroup: req.query.isGroup,
+        chatName: req.query.chatName,
+      });
     }
     /*await pool.query(
       "INSERT INTO chats (chat_id,created_by,is_group,chat_name) VALUES ($1,$2,$3,$4)",
@@ -79,7 +84,6 @@ router.post("/createchat", async (req, res) => {
     console.error(error);
   }
 });
-
 
 router.post("/sendmessage", async (req, res) => {
   const chat = new Chat(req.user.sub);

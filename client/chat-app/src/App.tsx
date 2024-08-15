@@ -10,8 +10,7 @@ import config from "../config";
 import { Session, UserResponse, createClient } from "@supabase/supabase-js";
 import { useEffect } from "react";
 import dataFetch from "./axios";
-import { currentChats } from "./lib/Atoms";
-import { io } from "socket.io-client";
+import { currentChats, userDetails } from "./lib/Atoms";
 const SUPABASE_KEY = config.SUPABASE_KEY || "";
 const SUPABASE_URL = config.SUPABASE_URL || "";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -21,7 +20,8 @@ export const supabaseAtom = atom(supabase);
 function App() {
   const [session, setSession] = useAtom(sessionAtom);
   const [user, setUser] = useAtom(userAtom);
-  const [chats, setChats] = useAtom(currentChats);
+  //const [chats, setChats] = useAtom(currentChats);
+  const [userDet,setUserDet] = useAtom(userDetails);
   useEffect(() => {
     async function getSession() {
       const session = await supabase.auth.getSession();

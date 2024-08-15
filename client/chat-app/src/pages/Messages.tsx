@@ -36,12 +36,6 @@ function Messages() {
       setMessages(messages.data);
     }
     getMessages();
-    async function getUserDetails(){
-      const userDetails = await dataFetch.get("/profile/getuserdetails");
-      console.log("Useer Detilas",userDetails.data);
-      setUser(userDetails.data);
-    }
-    getUserDetails();
     return () => {
       socket?.disconnect();
     };
