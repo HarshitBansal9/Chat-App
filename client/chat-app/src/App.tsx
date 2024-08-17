@@ -1,5 +1,6 @@
 import Messages from "./pages/Messages";
 import Login from "./pages/Login";
+import OpenChat from "./components/OpenChat";
 import Navbar from "./components/Navbar";
 import Friends from "./pages/Friends";
 import Profile from "./pages/Profile";

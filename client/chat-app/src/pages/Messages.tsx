@@ -25,6 +25,7 @@ function Messages() {
     async function getChats() {
       try {
       const chats = await dataFetch.get("/chats/getchats");
+      console.log("Chats",chats); 
       setChats(chats.data);
       } catch (error){
         console.log("Error",error);

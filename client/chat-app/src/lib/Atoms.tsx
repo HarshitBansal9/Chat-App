@@ -1,10 +1,9 @@
 import { atom } from 'jotai';
 import { Socket } from 'socket.io-client';
-export const currentFriends = atom([]);
-export const currentRequests = atom([]);
 export const currentChats = atom([]);
-export const currentMembers = atom([]);
-export const currentSentRequests = atom([]);   
+export const userInfo = atom<any>(undefined);
+export const showFriendsList = atom(false);
+export const selectedChoice = atom<string>("friends");
 export const openedChat = atom<Chat | null>(null);
 export const globalSocket = atom<Socket | null>(null);
 export const userDetails = atom<any>(undefined);
