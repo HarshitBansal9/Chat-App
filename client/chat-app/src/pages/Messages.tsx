@@ -4,13 +4,18 @@ import { Search } from "lucide-react";
 import { useAtom } from "jotai";
 import dataFetch from "../axios";
 import { sessionAtom } from "../App";
-import { currentChats, openedChat, globalSocket,userDetails } from "../lib/Atoms";
+import {
+  currentChats,
+  openedChat,
+  globalSocket,
+  userDetails,
+} from "../lib/Atoms";
 import OpenChat from "../components/OpenChat";
 function Messages() {
   const [userSocket, setUserSocket] = useAtom(globalSocket);
   const [session, setSession] = useAtom(sessionAtom);
   const [messages, setMessages] = useState([]);
-  const [user,setUser] = useAtom(userDetails);
+  const [user, setUser] = useAtom(userDetails);
   useEffect(() => {
     let socket: any;
     if (session) {
@@ -24,14 +29,21 @@ function Messages() {
 
     async function getChats() {
       try {
-      const chats = await dataFetch.get("/chats/getchats");
-      console.log("Chats",chats); 
-      setChats(chats.data);
-      } catch (error){
-        console.log("Error",error);
+        const chats = await dataFetch.get("/chats/getchats");
+        console.log("Chats", chats);
+        setChats(chats.data);
+      } catch (error) {
+        console.log("Error", error);
       }
     }
     getChats();
+
+    async function getchatsNew() {
+      const chats = await dataFetch.get("/chats/getchatsnew");
+      console.log("Chats New", chats);
+      //setChats(chats.data);
+    }
+    getchatsNew();
     async function getMessages() {
       const messages = await dataFetch.get("/chats/getmessages");
       setMessages(messages.data);
@@ -82,7 +94,7 @@ function Messages() {
             oldMessages={messages.filter((msg: any) => {
               return msg.chat_id == currentChat?.chat_id;
             })}
-            sender_image={(user?.image_url)}
+            sender_image={user?.image_url}
           />
         )}
       </div>

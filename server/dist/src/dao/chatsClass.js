@@ -1,7 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getKyselyUuid = getKyselyUuid;
+const kysely_1 = require("kysely");
 const database_1 = require("../database");
 const uuid_1 = require("uuid");
+function getKyselyUuid(uuid) {
+    return (0, kysely_1.sql) `${uuid}::uuid`;
+}
 class Chat {
     userId;
     //create a new uui
@@ -11,17 +16,32 @@ class Chat {
     }
     //Getting all users chats
     async getChats() {
-        database_1.db.selectFrom("chat_participants as cp")
-            .selectAll()
-            .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
-            .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
-            .leftJoin("messages as m", "m.message_id", "c.last_message_id")
-            .where("cp.chat_id", "in", database_1.db
-            .selectFrom(["chat_participants", "chats"])
-            .select("chats.chat_id")
-            .where("chats.chat_id", "=", "chat_participants.chat_id")
-            .where("chat_participants.user_id", "=", this.userId))
-            .execute();
+        console.log("this.userId", this.userId);
+        try {
+            database_1.db.selectFrom("chats")
+                .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
+                .select("chats.chat_id")
+                .where("chat_participants.user_id", "=", this.userId)
+                .execute();
+            // db.selectFrom("chat_participants as cp")
+            //   .selectAll()
+            //   .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
+            //   .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
+            //   .leftJoin("messages as m", "m.message_id", "c.last_message_id")
+            //   .where(
+            //     "cp.chat_id",S
+            //     "in",
+            //     db
+            //       .selectFrom("chats")
+            //       .select("chats.chat_id")
+            //       .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
+            //       .where("chat_participants.user_id", "=", this.userId)
+            //   )
+            //   .execute();
+        }
+        catch (error) {
+            console.error("Error", error);
+        }
     }
     //Sending a chat message
     async sendChatMessage(message) {

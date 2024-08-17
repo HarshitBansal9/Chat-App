@@ -1,5 +1,10 @@
+import { RawBuilder, sql } from "kysely";
 import { db } from "../database";
 import { v4 as uuidv4 } from "uuid";
+
+export function getKyselyUuid(uuid:string): RawBuilder<string>{
+  return sql`${uuid}::uuid`
+}
 class Chat {
   //create a new uui
   async createUUID() {
@@ -9,21 +14,32 @@ class Chat {
 
   //Getting all users chats
   async getChats() {
-    db.selectFrom("chat_participants as cp")
-      .selectAll()
-      .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
-      .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
-      .leftJoin("messages as m", "m.message_id", "c.last_message_id")
-      .where(
-        "cp.chat_id",
-        "in",
-        db
-          .selectFrom(["chat_participants", "chats"])
-          .select("chats.chat_id")
-          .where("chats.chat_id", "=", "chat_participants.chat_id")
-          .where("chat_participants.user_id", "=", this.userId)
-      )
-      .execute();
+    console.log("this.userId", this.userId);
+    try{
+
+    db.selectFrom("chats")
+    .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
+    .select("chats.chat_id")
+    .where("chat_participants.user_id", "=", this.userId)
+    .execute();
+    // db.selectFrom("chat_participants as cp")
+    //   .selectAll()
+    //   .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
+    //   .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
+    //   .leftJoin("messages as m", "m.message_id", "c.last_message_id")
+    //   .where(
+    //     "cp.chat_id",S
+    //     "in",
+    //     db
+    //       .selectFrom("chats")
+    //       .select("chats.chat_id")
+    //       .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
+    //       .where("chat_participants.user_id", "=", this.userId)
+    //   )
+    //   .execute();
+    } catch (error) {
+      console.error("Error", error);
+    }
   }
 
   //Sending a chat message

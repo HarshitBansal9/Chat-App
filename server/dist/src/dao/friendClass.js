@@ -78,7 +78,7 @@ class Friend {
     async getUserDetails() {
         console.log(this.userId);
         try {
-            const [allMembers, receivedRequests, allFriends, /* sentRequests*/] = await Promise.all([
+            const [allMembers, receivedRequests, allFriends1, allFriends2, sentRequests] = await Promise.all([
                 //get members
                 database_1.db
                     .selectFrom("users as u")
@@ -103,28 +103,34 @@ class Friend {
                     .execute(),
                 //get all friends
                 database_1.db
-                    .selectFrom(["users as u", "friends as f"])
-                    .where((eb) => eb.or([
-                    eb("u.auth_user_id", "=", "f.user1_id")
-                        .and("f.user2_id", "=", this.userId)
-                        .and("f.accepted", "=", true),
-                    eb("u.auth_user_id", "=", "f.user2_id")
-                        .and("f.user1_id", "=", this.userId)
-                        .and("f.accepted", "=", true),
-                ]))
+                    .selectFrom("users as u")
+                    .innerJoin("friends as f", "u.auth_user_id", "f.user2_id")
+                    .selectAll()
+                    .where("f.user1_id", "=", this.userId)
+                    .where("f.accepted", "=", true)
                     .execute(),
-                /*
-               //get sent requests
-               db
-                 .selectFrom("friends as f")
-                 .selectAll()
-                 .innerJoin("users as u", "f.user2_id", "u.auth_user_id")
-                 .where("f.user1_id", "=", this.userId)
-                 .where("f.accepted", "=", false)
-                 .execute(),
-               */
+                database_1.db
+                    .selectFrom("users as u")
+                    .innerJoin("friends as f", "u.auth_user_id", "f.user1_id")
+                    .selectAll()
+                    .where("f.user2_id", "=", this.userId)
+                    .where("f.accepted", "=", true)
+                    .execute(),
+                //get sent requests
+                database_1.db
+                    .selectFrom("friends as f")
+                    .selectAll()
+                    .innerJoin("users as u", "f.user2_id", "u.auth_user_id")
+                    .where("f.user1_id", "=", this.userId)
+                    .where("f.accepted", "=", false)
+                    .execute(),
             ]);
-            const details = { allMembers: allMembers, allRequests: receivedRequests, allFriends: allFriends, /* sentRequests: sentRequests*/ };
+            const details = {
+                allMembers: allMembers,
+                allRequests: receivedRequests,
+                allFriends: allFriends1.concat(allFriends2),
+                sentRequests: sentRequests,
+            };
             return details;
         }
         catch (error) {
