@@ -4,6 +4,7 @@ import dataFetch from "../axios";
 import { useAtom } from "jotai";
 import { userAtom } from "../App";
 import "./OpenChat.css";
+import profile_image from "../assets/images/profile_image.png";
 import { globalSocket } from "../lib/Atoms";
 import { Socket } from "socket.io-client";
 import { all } from "axios";
@@ -34,6 +35,7 @@ function OpenChat({
 }: OpenChat) {
   const listRef = useRef<HTMLDivElement>(null);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
+  const [imageLoaded,setImageLoaded] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [user, setUser] = useAtom(userAtom);
   const [txt, setTxt] = useState("");
@@ -69,14 +71,14 @@ function OpenChat({
           message_image: msg.message_image,
           sender_image: msg.sender_image,
         };
-      })
+      }),
     );
   }, [oldMessages]);
   useEffect(() => {
     console.log("Sender image", sender_image);
   }, []);
   useEffect(() => {
-    //3️⃣ bring the last item into view
+    //3bring the last item into view
     listRef.current?.lastElementChild?.scrollIntoView();
   }, [allMessages]);
 
@@ -117,23 +119,23 @@ function OpenChat({
     }
   }
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="header p-5 border-b-[1px] border-gray-700 flex flex-row">
-        <img src={image} alt="" className="h-12 w-12 rounded-full" />
+    <div className="flex h-full w-full flex-col">
+      <div className="header flex flex-row border-b-[1px] border-gray-700 p-5">
+        <img src={(imageLoaded)?(image):(profile_image)} onLoad={()=>{setImageLoaded(true)}}  alt="" className="h-12 w-12 rounded-full" />
         <div className="h-full pl-5">
-          <div className="text-lg text-gray-200 font-varela mb-auto">
+          <div className="mb-auto font-varela text-lg text-gray-200">
             {name}
           </div>
-          <div className="text-sm text-gray-400 font-varela mb-auto">
+          <div className="mb-auto font-varela text-sm text-gray-400">
             Offline
           </div>
         </div>
-        <div className="h-auto flex items-center gap-4 justify-center ml-auto flex flex-row">
-          <div className="rounded-3xl bg-light_gray pt-2 pb-2 pl-4 pr-4 flex flex-row justify-center items-center  gap-2">
+        <div className="ml-auto flex h-auto flex-row items-center justify-center gap-4">
+          <div className="flex flex-row items-center justify-center gap-2 rounded-3xl bg-light_gray pb-2 pl-4 pr-4 pt-2">
             <Star size={20} color="#e5e7eb" />
             <div className="font-varela text-sm text-gray-200">Priority</div>
           </div>
-          <div className="rounded-3xl bg-light_gray pt-2 pb-2 pl-4 pr-4 flex flex-row justify-center items-center  gap-2">
+          <div className="flex flex-row items-center justify-center gap-2 rounded-3xl bg-light_gray pb-2 pl-4 pr-4 pt-2">
             <User size={20} color="#e5e7eb" />
             <div className="font-varela text-sm text-gray-200">Profile</div>
           </div>
@@ -141,35 +143,35 @@ function OpenChat({
       </div>
       <div
         ref={listRef}
-        className="body flex flex-col h-full w-full overflow-y-auto scrollbar scrollbar-thumb-slate-700"
+        className="body flex h-full w-full flex-col overflow-y-auto scrollbar scrollbar-thumb-slate-700"
       >
         {allMessages.map((msg, idx) => {
           return msg.sender_id == user?.data.user?.id ? (
-            <div key={idx} className="flex flex-col mt-4 ml-auto mr-4">
-              <div className="p-3  max-w-[500px] bg-right_message text-gray-200 font-varela rounded-lg">
+            <div key={idx} className="ml-auto mr-4 mt-4 flex flex-col">
+              <div className="max-w-[500px] rounded-lg bg-right_message p-3 font-varela text-gray-200">
                 {msg.message}
               </div>
-              <div className="text-xs text-gray-400 font-varela mr-auto">
+              <div className="mr-auto font-varela text-xs text-gray-400">
                 {formatDate(msg.time)}
               </div>
             </div>
           ) : (
-            <div key={idx} className="flex flex-col mt-4 mr-auto ml-4">
+            <div key={idx} className="ml-4 mr-auto mt-4 flex flex-col">
               <div className="flex flex-row">
                 {msg.sender_image != undefined ? (
                   <img
                     src={msg.sender_image}
                     alt=""
-                    className="h-9 w-9 mt-auto mb-1 mr-2 rounded-full"
+                    className="mb-1 mr-2 mt-auto h-9 w-9 rounded-full"
                   />
                 ) : (
                   <div></div>
                 )}
-                <div className="p-3  max-w-[500px] bg-left_message text-gray-200 font-varela rounded-lg">
+                <div className="max-w-[500px] rounded-lg bg-left_message p-3 font-varela text-gray-200">
                   {msg.message}
                 </div>
               </div>
-              <div className="text-xs text-gray-400 font-varela ml-auto">
+              <div className="ml-auto font-varela text-xs text-gray-400">
                 {formatDate(msg.time)}
               </div>
             </div>
@@ -177,11 +179,11 @@ function OpenChat({
         })}
       </div>
       <div className="mt-auto flex flex-row">
-        <div className="h-full w-1/12 border-gray-700 bg-light_gray flex items-center justify-center">
+        <div className="flex h-full w-1/12 items-center justify-center border-gray-700 bg-light_gray">
           <Smile
             size={30}
             color="#e5e7eb"
-            className="ml-4 mr-4 mt-auto mb-auto"
+            className="mb-auto ml-4 mr-4 mt-auto"
           />
         </div>
         <div className="form-control w-10/12">
@@ -212,12 +214,12 @@ function OpenChat({
           onClick={() => {
             sendMessage(message);
           }}
-          className="h-full w-1/12 border-gray-700 bg-light_gray flex items-center justify-center"
+          className="flex h-full w-1/12 items-center justify-center border-gray-700 bg-light_gray"
         >
           <Send
             size={30}
             color="#e5e7eb"
-            className="ml-4 mr-4 mt-auto mb-auto"
+            className="mb-auto ml-4 mr-4 mt-auto"
           />
         </div>
       </div>
@@ -244,7 +246,7 @@ function MessageCard({
   timestamp,
   right,
 }: MessageCardProps) {
-  return <div className="p-2 rounded-xl">{text}</div>;
+  return <div className="rounded-xl p-2">{text}</div>;
 }
 
 export default OpenChat;

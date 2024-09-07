@@ -2,8 +2,8 @@ import { RawBuilder, sql } from "kysely";
 import { db } from "../database";
 import { v4 as uuidv4 } from "uuid";
 
-export function getKyselyUuid(uuid:string): RawBuilder<string>{
-  return sql`${uuid}::uuid`
+export function getKyselyUuid(uuid: string): RawBuilder<string> {
+  return sql`${uuid}::uuid`;
 }
 class Chat {
   //create a new uui
@@ -15,28 +15,56 @@ class Chat {
   //Getting all users chats
   async getChats() {
     console.log("this.userId", this.userId);
-    try{
+    try {
+      // const result = await db
+      //   .selectFrom("chats")
+      //   .innerJoin(
+      //     "chat_participants",
+      //     "chats.chat_id",
+      //     "chat_participants.chat_id"
+      //   )
+      //   .select("chats.chat_id")
+      //   .where("chat_participants.user_id", "=", this.userId)
+      //   .execute();
 
-    db.selectFrom("chats")
-    .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
-    .select("chats.chat_id")
-    .where("chat_participants.user_id", "=", this.userId)
-    .execute();
-    // db.selectFrom("chat_participants as cp")
-    //   .selectAll()
-    //   .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
-    //   .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
-    //   .leftJoin("messages as m", "m.message_id", "c.last_message_id")
-    //   .where(
-    //     "cp.chat_id",S
-    //     "in",
-    //     db
-    //       .selectFrom("chats")
-    //       .select("chats.chat_id")
-    //       .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
-    //       .where("chat_participants.user_id", "=", this.userId)
-    //   )
-    //   .execute();
+      return db
+        .selectFrom("chat_participants as cp")
+        .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
+        .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
+        .leftJoin("messages as m", "m.message_id", "c.last_message_id")
+        .select([
+          "cp.participant_id",
+          "c.chat_id",
+          "cp.user_id",
+          "cp.joined_at",
+          "u.id",
+          "u.username",
+          "u.auth_user_id",
+          "u.image_url",
+          "c.created_at",
+          "c.created_by",
+          "c.is_group",
+          "c.chat_name",
+          "c.last_message_id",
+          "m.message_id",
+          "m.sender_id",
+          "m.message_text",
+          "m.sent_at",
+        ])
+        .where(
+          "cp.chat_id",
+          "in",
+          db
+            .selectFrom("chats")
+            .select("chats.chat_id")
+            .innerJoin(
+              "chat_participants",
+              "chats.chat_id",
+              "chat_participants.chat_id"
+            )
+            .where("chat_participants.user_id", "=", this.userId)
+        )
+        .execute();
     } catch (error) {
       console.error("Error", error);
     }
@@ -91,14 +119,12 @@ class Chat {
     const uuid = await this.createUUID();
     const chatId = await db
       .insertInto("chats")
-      .values(
-        {
-          chat_id: uuid,
-          created_by: this.userId,
-          is_group: isGroup,
-          chat_name: chatName,
-        },
-      )
+      .values({
+        chat_id: uuid,
+        created_by: this.userId,
+        is_group: isGroup,
+        chat_name: chatName,
+      })
       .execute();
 
     const chatParticipant = await db

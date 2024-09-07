@@ -36,6 +36,7 @@ io.of("/chat").on("connection", async (socket) => {
   for (const chatId of chatIds.rows) {
     socket.join(chatId.chat_id);
   }
+  
   socket.on("send_message", async (data) => {
     socket.to(data.chatId).emit("receive_message", data);
   });

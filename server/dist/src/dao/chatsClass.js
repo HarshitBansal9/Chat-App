@@ -18,26 +18,20 @@ class Chat {
     async getChats() {
         console.log("this.userId", this.userId);
         try {
-            database_1.db.selectFrom("chats")
+            const result = await database_1.db
+                .selectFrom("chats")
                 .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
                 .select("chats.chat_id")
                 .where("chat_participants.user_id", "=", this.userId)
                 .execute();
-            // db.selectFrom("chat_participants as cp")
-            //   .selectAll()
-            //   .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
-            //   .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
-            //   .leftJoin("messages as m", "m.message_id", "c.last_message_id")
-            //   .where(
-            //     "cp.chat_id",S
-            //     "in",
-            //     db
-            //       .selectFrom("chats")
-            //       .select("chats.chat_id")
-            //       .innerJoin("chat_participants", "chats.chat_id", "chat_participants.chat_id")
-            //       .where("chat_participants.user_id", "=", this.userId)
-            //   )
-            //   .execute();
+            return database_1.db
+                .selectFrom("chat_participants as cp")
+                .selectAll()
+                .innerJoin("users as u", "u.auth_user_id", "cp.user_id")
+                .innerJoin("chats as c", "c.chat_id", "cp.chat_id")
+                .leftJoin("messages as m", "m.message_id", "c.last_message_id")
+                .where("cp.chat_id", "in", result.map((chat) => chat.chat_id))
+                .execute();
         }
         catch (error) {
             console.error("Error", error);
