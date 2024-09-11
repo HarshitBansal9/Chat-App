@@ -16,7 +16,10 @@ function Messages() {
   const [userSocket, setUserSocket] = useAtom(globalSocket);
   const [session, setSession] = useAtom(sessionAtom);
   const [messages, setMessages] = useState([]);
-  const [user, setUser] = useAtom(userDetails);
+  const [userDet, setUserDet] = useAtom(userDetails);
+  const [currentChat, setCurrentChat] = useAtom(openedChat);
+  const [chats, setChats] = useAtom<any>(currentChats);
+
   useEffect(() => {
     let socket: any;
     if (session) {
@@ -32,7 +35,7 @@ function Messages() {
       try {
         const chats = await dataFetch.get("/chats/getchats");
         console.log("Chats", chats);
-        setChats(chats.data);
+        //setChats(chats.data);
       } catch (error) {
         console.log("Error", error);
       }
@@ -42,22 +45,30 @@ function Messages() {
     async function getchatsNew() {
       const chats = await dataFetch.get("/chats/getchatsnew");
       console.log("Chats New", chats);
-      //setChats(chats.data);
+      setChats(chats.data);
     }
     getchatsNew();
-    
+
     async function getMessages() {
       const messages = await dataFetch.get("/chats/getmessages");
       setMessages(messages.data);
     }
     getMessages();
+
+    async function getUser() {
+      console.log("Reached here",userDet);
+      if (userDet === null || userDet === undefined) {
+        console.log("Reached here");
+        const userDetails = await dataFetch.get("/profile/getuserdetails");
+        setUserDet(userDetails);
+      }
+    }
+    getUser();
+
     return () => {
       socket?.disconnect();
     };
   }, [session]);
-
-  const [currentChat, setCurrentChat] = useAtom(openedChat);
-  const [chats, setChats] = useAtom(currentChats);
   return (
     <div className="flex w-5/6 flex-row bg-custom_background">
       <div className="flex h-[100vh] w-1/4 flex-col border-r-[1px] border-gray-700">
@@ -68,18 +79,36 @@ function Messages() {
               <Search size={20} />
             </div>
           </div>
-          {chats.map((chat: any, idx) => {
-            return (
-              <ChatCard
-                key={idx}
-                name={!chat.is_group ? chat.other_user_name : chat.chat_name}
-                last_message={chat.last_message_text}
-                image={chat.other_user_image_url}
-                chat_id={chat.chat_id}
-                isGroup={chat.is_group}
-              />
-            );
-          })}
+          {chats != null && userDet != null ? (
+            Object.keys(chats).map((chat: any, idx) => {
+              return (
+                <ChatCard
+                  key={idx}
+                  name={
+                    !chat.is_group
+                      ? chats[chat].participants[0].user_id ===
+                        userDet.auth_user_id
+                        ? chats[chat].participants[1].username
+                        : chats[chat].participants[0].username
+                      : chats[chat].chat_name
+                  }
+                  last_message={chats[chat].last_message_text}
+                  image={
+                    !chat.is_group
+                      ? chats[chat].participants[0].user_id ===
+                        userDet.auth_user_id
+                        ? chats[chat].participants[1].image_url
+                        : chats[chat].participants[0].image_url
+                      : chats[chat].image_url
+                  }
+                  chat_id={chat}
+                  isGroup={chats[chat].is_group}
+                />
+              );
+            })
+          ) : (
+            <div></div>
+          )}
         </div>
       </div>
       <div className="h-screen w-3/4">
@@ -96,7 +125,7 @@ function Messages() {
             oldMessages={messages.filter((msg: any) => {
               return msg.chat_id == currentChat?.chat_id;
             })}
-            sender_image={user?.image_url}
+            sender_image={userDet?.image_url}
           />
         )}
       </div>
@@ -119,7 +148,7 @@ function ChatCard({
   chat_id,
   isGroup,
 }: ChatCardProps) {
-  const [imageLoaded,setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [currentChat, setCurrentChat] = useAtom(openedChat);
   return (
     <div
@@ -128,12 +157,18 @@ function ChatCard({
           chat_id: chat_id,
           isGroup: isGroup,
           name: name,
-          image: image
+          image: image,
         });
       }}
       className="flex w-full flex-row items-center justify-center border-b-[1px] border-gray-700 p-4 hover:cursor-pointer hover:border-none hover:bg-navbar_background"
     >
-      <img src={(imageLoaded)?(image):(profile_image)} onLoad={()=>{setImageLoaded(true)}} className="mr-auto h-12 w-12 rounded-full" />
+      <img
+        src={imageLoaded ? image : profile_image}
+        onLoad={() => {
+          setImageLoaded(true);
+        }}
+        className="mr-auto h-12 w-12 rounded-full"
+      />
       <div className="flex h-full w-full flex-col pl-4">
         <div className="mb-auto font-varela text-gray-200">{name}</div>
         {last_message == null ? (

@@ -23,7 +23,7 @@ function Profile() {
       console.log("Useer Detilas", userDetails.data);
       console.log("picture", userDetails.data[0].raw_user_meta_data.avatar_url);
       setUserDet(userDetails.data[0]);
-    }
+    } 
 
     async function getDetails() {
       const userDetails = await dataFetch.get("/friends/getdetails");
@@ -91,7 +91,7 @@ function Profile() {
             </p>
           </div>
           <div className="mt-auto flex w-full justify-center pb-4">
-            <div className="text-navbar_backkground flex w-5/6 items-center justify-center rounded-lg bg-gray-500 p-3 font-varela text-lg hover:cursor-pointer hover:bg-gray-400">
+            <div className="text-navbar_background flex w-5/6 items-center justify-center rounded-lg bg-gray-500 p-3 font-varela text-lg hover:cursor-pointer hover:bg-gray-400">
               Edit Profile
             </div>
           </div>

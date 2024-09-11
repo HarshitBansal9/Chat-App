@@ -34,10 +34,35 @@ router.use(function (req, res, next) {
 
 // Query Builders
 
+
 router.get("/getchatsnew",async (req,res)=>{
   const chat = new Chat(req.user.sub);
-  const chats = await chat.getChats();
-  console.log("new chats",chats);
+  const chatsResponse = await chat.getChats();
+  //console.log("new chats",chatsResponse);
+  let chats:any = {};
+  if (chatsResponse) {
+    for (const participants of chatsResponse){
+      if(!chats[participants.chat_id]){
+        chats[participants.chat_id]={
+          chat_id:participants.chat_id,
+          chat_name:participants.chat_name,
+          is_group:participants.is_group,
+          created_at:participants.created_at,
+          created_by:participants.created_by,
+          last_message_id:participants.last_message_id,
+          last_message_text:participants.message_text,
+          last_message_timestamp:participants.sent_at,
+          participants:[]
+        }
+      }
+      chats[participants.chat_id].participants.push({
+        user_id:participants.user_id,
+        username:participants.username,
+        image_url:participants.image_url
+      })
+    }
+  }
+  console.log("new chats",chats[Object.keys(chats)[0]].participants);
   res.json(chats);
 })
 

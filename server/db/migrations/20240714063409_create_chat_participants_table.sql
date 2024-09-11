@@ -10,7 +10,7 @@ create table chat_participants(
 drop table chat_participants;
 
 
-SELECT chat_participants, users, chat,messages where 
+-- SELECT chat_participants, users, chat,messages where 
 -- chat_participants.chat_id = chat.chat_id AND 
 -- chat_participants.user_id = users.auth_user_id AND 
 -- chat.last_message_id = message.message_id AND

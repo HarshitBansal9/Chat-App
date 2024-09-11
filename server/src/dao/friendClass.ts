@@ -81,8 +81,8 @@ class Friend {
   }
 
   //Getting all user details
-  async getUserDetails() {
-    console.log(this.userId);
+  async getUserDetails(id = this.userId) {
+    console.log("User ID", id);
     try {
       const [allMembers, receivedRequests, allFriends1,allFriends2, sentRequests] =
         await Promise.all([
@@ -90,30 +90,14 @@ class Friend {
           db
             .selectFrom("users as u")
             .selectAll()
-            .where("u.auth_user_id", "!=", this.userId)
-            .where(
-              "u.auth_user_id",
-              "not in",
-              db
-                .selectFrom("friends as f")
-                .select("f.user2_id")
-                .where("f.user1_id", "=", this.userId)
-            )
-            .where(
-              "u.auth_user_id",
-              "not in",
-              db
-                .selectFrom("friends as f")
-                .select("f.user1_id")
-                .where("f.user2_id", "=", this.userId)
-            )
+            .where("u.auth_user_id", "!=", id)
             .execute(),
           //get received requests
           db
             .selectFrom("users as u")
             .selectAll()
             .innerJoin("friends as f", "u.auth_user_id", "f.user1_id")
-            .where("f.user2_id", "=", this.userId)
+            .where("f.user2_id", "=", id)
             .where("f.accepted", "=", false)
             .execute(),
 
@@ -122,7 +106,7 @@ class Friend {
             .selectFrom("users as u")
             .innerJoin("friends as f", "u.auth_user_id", "f.user2_id")
             .selectAll()
-            .where("f.user1_id", "=", this.userId)
+            .where("f.user1_id", "=", id)
             .where("f.accepted", "=", true)
             .execute(),
 
@@ -130,7 +114,7 @@ class Friend {
             .selectFrom("users as u")
             .innerJoin("friends as f", "u.auth_user_id", "f.user1_id")
             .selectAll()
-            .where("f.user2_id", "=", this.userId)
+            .where("f.user2_id", "=", id)
             .where("f.accepted", "=", true)
             .execute(),
             
@@ -139,7 +123,7 @@ class Friend {
             .selectFrom("friends as f")
             .selectAll()
             .innerJoin("users as u", "f.user2_id", "u.auth_user_id")
-            .where("f.user1_id", "=", this.userId)
+            .where("f.user1_id", "=", id)
             .where("f.accepted", "=", false)
             .execute(),
         ]);

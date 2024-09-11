@@ -23,7 +23,12 @@ router.use(function (req, res, next) {
 router.get("/getuserdetails", async (req, res) => {
   try {
     console.log("getting user details");
+    const id = req.query.id;
     const profile = new Profile(req.user.sub);
+    if (typeof id === "string") {
+      const userDetails = await profile.getUserDetails(id);
+      res.json(userDetails);
+    }
     const userDetails = await profile.getUserDetails();
     res.json(userDetails);
   } catch (error) {

@@ -10,6 +10,7 @@
 // import { useNavigate } from "react-router-dom";
 // import dataFetch from "../axios";
 function Friends() {
+    return <div></div>
 //   const [requests, setRequests] = useAtom(currentRequests);
 //   const [members, setMembers] = useAtom(currentMembers);
 //   const [sentRequests, setSentRequests] = useAtom(currentSentRequests);
@@ -127,8 +128,7 @@ function Friends() {
 //   const [requests, setRequests] = useAtom(currentRequests);
 //   const [friends, setFriends]: any = useAtom(currentFriends);
 //   function handleRequest(action: string) {
-//     try {
-//       if (action === "accept") {
+//     try {Pron === "accept") {
 //         const newFriend = {
 //           id: friends.length > 0 ? friends[friends.length - 1].id + 1 : 1,
 //           username: props.username,

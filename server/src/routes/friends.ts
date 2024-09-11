@@ -41,10 +41,18 @@ router.post("/removefriend", async (req, res) => {
 router.get("/getdetails", async (req, res) => {
   try {
     const id = getUserId(req);
+    const otherId = req.query.id;
     const friend = new Friend(req.user.sub);
-    const details = await friend.getUserDetails();
-    console.log("User details",details);
-    res.json(details);
+    if (typeof otherId === "string") {
+      console.log("Getting other users details: ",otherId);
+      const details = await friend.getUserDetails(otherId);
+      console.log("User details",details);
+      res.json(details);
+    } else {
+      const details = await friend.getUserDetails();
+      console.log("User details",details);
+      res.json(details);
+    } 
     /*const [allMembers, receivedRequests, allFriends, sentRequests] =
       await Promise.all([
         pool.query(
