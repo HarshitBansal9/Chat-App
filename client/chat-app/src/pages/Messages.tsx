@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import dataFetch from "../axios";
 import { sessionAtom } from "../App";
 import profile_image from "../assets/images/profile_image.png";
+import { userInfo } from "../lib/Atoms";
 import {
   currentChats,
   openedChat,
@@ -12,13 +13,67 @@ import {
   userDetails,
 } from "../lib/Atoms";
 import OpenChat from "../components/OpenChat";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+
 function Messages() {
   const [userSocket, setUserSocket] = useAtom(globalSocket);
   const [session, setSession] = useAtom(sessionAtom);
   const [messages, setMessages] = useState([]);
   const [userDet, setUserDet] = useAtom(userDetails);
+  const [groupName, setGroupName] = useState("");
+  const [membersForGroup, setMembersForGroup] = useState<String[]>([]);
+  const [userInformation, setUserInformation] = useAtom<any>(userInfo);
   const [currentChat, setCurrentChat] = useAtom(openedChat);
   const [chats, setChats] = useAtom<any>(currentChats);
+
+  async function createGroup() {
+    if (groupName === "") {
+      alert("Group Name cannot be empty");
+      return;
+    }
+    if (membersForGroup.length === 0) {
+      alert("Please add members to the group");
+      return;
+    }
+    try {
+      console.log("Group Name", groupName);
+      console.log("Members", membersForGroup);
+      alert("Group Created");
+      await dataFetch.post("/chats/creategroupchat", null, {
+        params: {
+          chatName: groupName,
+          users: membersForGroup,
+        },
+      });
+
+    } catch (error) {
+      console.log("Error", error);
+    }
+  }
+  const handleChange = (event: any) => {
+    const value = event.target.value;
+    setGroupName(value);
+  };
 
   useEffect(() => {
     let socket: any;
@@ -30,17 +85,6 @@ function Messages() {
       console.log("Socket", socket, session);
       setUserSocket(socket);
     }
-
-    async function getChats() {
-      try {
-        const chats = await dataFetch.get("/chats/getchats");
-        console.log("Chats", chats);
-        //setChats(chats.data);
-      } catch (error) {
-        console.log("Error", error);
-      }
-    }
-    getChats();
 
     async function getchatsNew() {
       const chats = await dataFetch.get("/chats/getchatsnew");
@@ -56,7 +100,7 @@ function Messages() {
     getMessages();
 
     async function getUser() {
-      console.log("Reached here",userDet);
+      console.log("Reached here", userDet);
       if (userDet === null || userDet === undefined) {
         console.log("Reached here");
         const userDetails = await dataFetch.get("/profile/getuserdetails");
@@ -78,6 +122,92 @@ function Messages() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-light_gray">
               <Search size={20} />
             </div>
+          </div>
+          <div>
+            <Dialog>
+              <DialogTrigger className="w-1/2 border-r-[1px] border-gray-700 p-2 font-varela text-gray-100 hover:brightness-150">
+                Create Group
+              </DialogTrigger>
+              <DialogContent className="rounded-lg border-[1px] border-white bg-black">
+                <DialogHeader>
+                  <DialogTitle className="border-b-[1px] border-white pb-4 text-gray-100">
+                    Create A Group
+                  </DialogTitle>
+                  <DialogDescription>
+                    <div className="mb-4 mt-4 grid w-full max-w-sm items-center gap-1.5">
+                      <Label>Enter Group Name</Label>
+                      <Input
+                        type="text"
+                        onChange={handleChange}
+                        placeholder="Group name"
+                      />
+                    </div>
+                    <div className="mb-4 mt-4 grid w-full max-w-sm items-center gap-1.5">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <Label>Add Participants</Label>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {userInformation?.allFriends.map(
+                            (friend: any, index: number) => {
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <Checkbox
+                                    id="checkbox"
+                                    checked={
+                                      membersForGroup.includes(
+                                        friend.auth_user_id,
+                                      )
+                                        ? true
+                                        : false
+                                    }
+                                    onCheckedChange={() => {
+                                      if (
+                                        membersForGroup.includes(
+                                          friend.auth_user_id,
+                                        )
+                                      ) {
+                                        setMembersForGroup(
+                                          membersForGroup.filter(
+                                            (member) =>
+                                              member != friend.auth_user_id,
+                                          ),
+                                        );
+                                      } else {
+                                        setMembersForGroup([
+                                          ...membersForGroup,
+                                          friend.auth_user_id,
+                                        ]);
+                                      }
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor="user"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                  >
+                                    {friend.username}
+                                  </label>
+                                </div>
+                              );
+                            },
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        createGroup();
+                      }}
+                    >
+                      Create Group
+                    </Button>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
           {chats != null && userDet != null ? (
             Object.keys(chats).map((chat: any, idx) => {
@@ -160,7 +290,7 @@ function ChatCard({
           image: image,
         });
       }}
-      className="flex w-full flex-row items-center justify-center border-b-[1px] border-gray-700 p-4 hover:cursor-pointer hover:border-none hover:bg-navbar_background"
+      className="flex w-full flex-row items-center justify-center border-b-[1px] border-t-[1px] border-gray-700 p-4 hover:cursor-pointer hover:border-none hover:bg-navbar_background"
     >
       <img
         src={imageLoaded ? image : profile_image}

@@ -34,37 +34,36 @@ router.use(function (req, res, next) {
 
 // Query Builders
 
-
-router.get("/getchatsnew",async (req,res)=>{
+router.get("/getchatsnew", async (req, res) => {
   const chat = new Chat(req.user.sub);
   const chatsResponse = await chat.getChats();
   //console.log("new chats",chatsResponse);
-  let chats:any = {};
+  let chats: any = {};
   if (chatsResponse) {
-    for (const participants of chatsResponse){
-      if(!chats[participants.chat_id]){
-        chats[participants.chat_id]={
-          chat_id:participants.chat_id,
-          chat_name:participants.chat_name,
-          is_group:participants.is_group,
-          created_at:participants.created_at,
-          created_by:participants.created_by,
-          last_message_id:participants.last_message_id,
-          last_message_text:participants.message_text,
-          last_message_timestamp:participants.sent_at,
-          participants:[]
-        }
+    for (const participants of chatsResponse) {
+      if (!chats[participants.chat_id]) {
+        chats[participants.chat_id] = {
+          chat_id: participants.chat_id,
+          chat_name: participants.chat_name,
+          is_group: participants.is_group,
+          created_at: participants.created_at,
+          created_by: participants.created_by,
+          last_message_id: participants.last_message_id,
+          last_message_text: participants.message_text,
+          last_message_timestamp: participants.sent_at,
+          participants: [],
+        };
       }
       chats[participants.chat_id].participants.push({
-        user_id:participants.user_id,
-        username:participants.username,
-        image_url:participants.image_url
-      })
+        user_id: participants.user_id,
+        username: participants.username,
+        image_url: participants.image_url,
+      });
     }
   }
-  console.log("new chats",chats[Object.keys(chats)[0]].participants);
+  console.log("new chats", chats[Object.keys(chats)[0]].participants);
   res.json(chats);
-})
+});
 
 router.get("/getchats", async (req, res) => {
   const chat = new Chat(req.user.sub);
@@ -74,7 +73,7 @@ router.get("/getchats", async (req, res) => {
     "SELECT c.chat_id, c.chat_name, p.user_id, CASE WHEN c.is_group = false THEN (SELECT u.username FROM chat_participants cp JOIN users u ON cp.user_id = u.auth_user_id WHERE cp.chat_id = c.chat_id AND cp.user_id != p.user_id LIMIT 1) ELSE NULL END AS other_user_name, CASE WHEN c.is_group = false THEN (SELECT u.image_url FROM chat_participants cp JOIN users u ON cp.user_id = u.auth_user_id WHERE cp.chat_id = c.chat_id AND cp.user_id != p.user_id LIMIT 1) ELSE NULL END AS other_user_image_url, CASE WHEN c.last_message_id IS NOT NULL THEN (SELECT m.message_text FROM messages m WHERE m.message_id = c.last_message_id) ELSE NULL END AS last_message_text FROM chats c INNER JOIN chat_participants p ON c.chat_id = p.chat_id WHERE p.user_id = $1 ORDER BY c.chat_id",
     [id]
   );
-  console.log("old chats",userChats.rows);
+  console.log("old chats", userChats.rows);
   res.json(userChats.rows);
 });
 
@@ -112,6 +111,20 @@ router.post("/createchat", async (req, res) => {
         "insert into chat_participants (chat_id, user_id) values ($1,$2),($1,$3)",
         [uuid, id, req.query.user]
       );*/
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.post("/creategroupchat", async (req, res) => {
+  try {
+    const chat = new Chat(req.user.sub);
+    if (typeof req.query.chatName === "string") {
+      await chat.createNewGroupChat({
+        users: req.query.users as string[],
+        chatName: req.query.chatName,
+      });
+    }
   } catch (error) {
     console.error(error);
   }

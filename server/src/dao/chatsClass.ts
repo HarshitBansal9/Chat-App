@@ -142,6 +142,33 @@ class Chat {
       .execute();
   }
 
+  //creating a new group chat
+  async createNewGroupChat(chat: newGroup) {
+    const { users, chatName } = chat;
+    const uuid = await this.createUUID();
+    const chatId = await db
+      .insertInto("chats")
+      .values({
+        chat_id: uuid,
+        created_by: this.userId,
+        is_group: true,
+        chat_name: chatName,
+      })
+      .execute();
+    let usersArray = users.map((user: string) => ({
+      chat_id: uuid,
+      user_id: user,
+    }));
+    usersArray.push({
+      chat_id: uuid,
+      user_id: this.userId,
+    });
+    const chatParticipants = await db
+      .insertInto("chat_participants")
+      .values(usersArray)
+      .execute();
+  }
+
   constructor(private userId: string) {}
 }
 
@@ -157,5 +184,11 @@ interface ChatMessage {
 interface newChat {
   user: string;
   isGroup: boolean;
+  chatName: string | null;
+}
+
+interface newGroup {
+  users: string[];
+  groupImage?: string | null;
   chatName: string | null;
 }
