@@ -254,7 +254,7 @@ function App() {
     }
     async function getUser() {
       const user = await supabase.auth.getUser();
-      console.log(user);
+      console.log("User", user);
       setUser(user);
     }
     if (!user) {
@@ -272,7 +272,6 @@ function App() {
   //<input autocomplete="off" role="combobox" spellcheck="false" aria-expanded="true" aria-controls="kbar-listbox" aria-activedescendant="kbar-listbox-item-7" placeholder="Type a command or search…" value="" style="padding: 12px 16px; font-size: 16px; width: 100%; box-sizing: border-box; outline: none; border: none; background: var(--background); color: var(--foreground);">
   return (
     <>
-      
       <CommandPalette
         search={search}
         isOpen={isOpen}

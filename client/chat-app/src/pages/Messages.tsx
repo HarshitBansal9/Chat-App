@@ -3,16 +3,13 @@ import io from "socket.io-client";
 import { Search } from "lucide-react";
 import { useAtom } from "jotai";
 import dataFetch from "../axios";
-import { sessionAtom } from "../App";
+import { sessionAtom, userAtom } from "../App";
 import profile_image from "../assets/images/profile_image.png";
+import groupImage from "../assets/images/groupImage.png";
 import { userInfo } from "../lib/Atoms";
-import {
-  currentChats,
-  openedChat,
-  globalSocket,
-  userDetails,
-} from "../lib/Atoms";
+import { currentChats, openedChat, globalSocket } from "../lib/Atoms";
 import OpenChat from "../components/OpenChat";
+
 import {
   Dialog,
   DialogContent,
@@ -24,9 +21,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
@@ -39,7 +33,7 @@ function Messages() {
   const [userSocket, setUserSocket] = useAtom(globalSocket);
   const [session, setSession] = useAtom(sessionAtom);
   const [messages, setMessages] = useState([]);
-  const [userDet, setUserDet] = useAtom(userDetails);
+  const [user, setUser] = useAtom(userAtom);
   const [groupName, setGroupName] = useState("");
   const [membersForGroup, setMembersForGroup] = useState<String[]>([]);
   const [userInformation, setUserInformation] = useAtom<any>(userInfo);
@@ -65,7 +59,6 @@ function Messages() {
           users: membersForGroup,
         },
       });
-
     } catch (error) {
       console.log("Error", error);
     }
@@ -85,7 +78,6 @@ function Messages() {
       console.log("Socket", socket, session);
       setUserSocket(socket);
     }
-
     async function getchatsNew() {
       const chats = await dataFetch.get("/chats/getchatsnew");
       console.log("Chats New", chats);
@@ -98,16 +90,6 @@ function Messages() {
       setMessages(messages.data);
     }
     getMessages();
-
-    async function getUser() {
-      console.log("Reached here", userDet);
-      if (userDet === null || userDet === undefined) {
-        console.log("Reached here");
-        const userDetails = await dataFetch.get("/profile/getuserdetails");
-        setUserDet(userDetails);
-      }
-    }
-    getUser();
 
     return () => {
       socket?.disconnect();
@@ -209,24 +191,26 @@ function Messages() {
               </DialogContent>
             </Dialog>
           </div>
-          {chats != null && userDet != null ? (
+          {chats != null && user != null && user.data != null ? (
             Object.keys(chats).map((chat: any, idx) => {
+              console.log("Chat and userid", chats[chat], user?.data.user?.id);
+
               return (
                 <ChatCard
                   key={idx}
                   name={
-                    !chat.is_group
-                      ? chats[chat].participants[0].user_id ===
-                        userDet.auth_user_id
+                    chats[chat].is_group === true
+                      ? chats[chat].chat_name
+                      : chats[chat].participants[0].user_id ===
+                          user?.data.user?.id
                         ? chats[chat].participants[1].username
                         : chats[chat].participants[0].username
-                      : chats[chat].chat_name
                   }
                   last_message={chats[chat].last_message_text}
                   image={
-                    !chat.is_group
+                    chats[chat].is_group != true
                       ? chats[chat].participants[0].user_id ===
-                        userDet.auth_user_id
+                        user?.data.user?.id
                         ? chats[chat].participants[1].image_url
                         : chats[chat].participants[0].image_url
                       : chats[chat].image_url
@@ -251,11 +235,15 @@ function Messages() {
             chat_id={currentChat.chat_id}
             isGroup={currentChat.isGroup}
             name={currentChat.name}
-            image={currentChat.image}
+            image={
+              currentChat.image === null || currentChat.image === undefined
+                ? groupImage
+                : currentChat.image
+            }
             oldMessages={messages.filter((msg: any) => {
               return msg.chat_id == currentChat?.chat_id;
             })}
-            sender_image={userDet?.image_url}
+            sender_image={user?.data.user?.user_metadata.image_url}
           />
         )}
       </div>
@@ -280,6 +268,9 @@ function ChatCard({
 }: ChatCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentChat, setCurrentChat] = useAtom(openedChat);
+  useEffect(() => {
+    console.log(name, last_message, image, time, chat_id, isGroup);
+  });
   return (
     <div
       onClick={() => {
@@ -293,7 +284,13 @@ function ChatCard({
       className="flex w-full flex-row items-center justify-center border-b-[1px] border-t-[1px] border-gray-700 p-4 hover:cursor-pointer hover:border-none hover:bg-navbar_background"
     >
       <img
-        src={imageLoaded ? image : profile_image}
+        src={
+          image === null || image === undefined
+            ? groupImage
+            : imageLoaded
+              ? image
+              : profile_image
+        }
         onLoad={() => {
           setImageLoaded(true);
         }}

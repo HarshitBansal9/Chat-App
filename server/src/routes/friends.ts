@@ -88,7 +88,6 @@ router.post("/sendrequest", async (req, res) => {
   const friend = new Friend(req.user.sub);
   try {
     if (
-      typeof req.query.sender === "string" &&
       typeof req.query.receiver === "string"
     ) {
       await friend.sendFriendRequest(req.query.receiver);

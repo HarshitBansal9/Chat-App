@@ -1,31 +1,66 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import dataFetch from "../axios";
+import { userDetails, userInfo } from "@/lib/Atoms";
+import { useAtom } from "jotai";
 
 function OtherProfile() {
   const location = useLocation();
   const id = location.pathname.split("/")[2];
-  const [info, setInfo] = useState<any>([]);
+  const [isFriend, setIsFriend] = useState<any>(null);
+  const [info,setInfo] = useAtom(userInfo);
   const [otherUserDet, setOtherUserDet] = useState<any>([]);
+
+  async function sendFriendRequest(){
+    const response = await dataFetch.post("/friends/sendrequest",{
+      receiver: id
+    });
+    console.log("Response",response);
+  }
+
   useEffect(() => {
     async function getUserDetails() {
-      console.log("getting user detials");
       const userDetails = await dataFetch.get("/profile/getuserdetails", {
         params: { id: id },
       });
-      console.log("Useer Detilas", userDetails.data);
-      console.log("picture", userDetails.data[0].raw_user_meta_data.avatar_url);
       setOtherUserDet(userDetails.data[0]);
     }
     getUserDetails();
-    async function getDetails() {
-      const userDetails = await dataFetch.get("/friends/getdetails", {
-        params: { id: id },
-      });
-      setInfo(userDetails.data);
-      console.log("User Details", userDetails.data);
+
+    // async function getDetails() {
+    //   const userDetails = await dataFetch.get("/friends/getdetails", {
+    //     params: { id: id },
+    //   });
+    //   for (let i = 0; i < userDetails.data.allFriends.length; i++) {
+    //     console.log("User Details", userDetails.data.allFriends[i].auth_user_id);
+    //     if (userDetails.data.allFriends[i].auth_user_id === id) {
+    //       console.log("User is a friend");
+    //       setIsFriend(true);
+    //       return;
+    //     }
+    //   }
+    //   setIsFriend(false);
+    // }
+    // getDetails();
+
+    async function getCurrentUserDetails(){
+      const userDetails = await dataFetch.get("/friends/getdetails");
+      
+      for (let i = 0; i < userDetails.data.allFriends.length; i++) {
+        console.log("User Details", userDetails.data.allFriends[i].auth_user_id);
+        if (userDetails.data.allFriends[i].auth_user_id === id) {
+          console.log("User is a friend");
+          setInfo(userDetails.data[0]);
+          setIsFriend(true);
+          return;
+        }
+      }
+      setIsFriend(false);
     }
-    getDetails();
+    if (info === null || info === undefined){
+      console.log("Getting current user details");
+      getCurrentUserDetails();
+    }
   }, []);
   return (
     <div className="flex w-5/6 justify-center bg-custom_background">
@@ -48,16 +83,24 @@ function OtherProfile() {
             </div>
           </div>
         </div>
-        <div className="h-2/3 w-full text-md p-2 font-varela text-gray-100 font-bold">
-            Description:
+        <div className="text-md h-2/3 w-full p-2 font-varela font-bold text-gray-100">
+          Description:
         </div>
         <div className="flex w-full flex-row gap-2">
-          <div className="text-md ml-2 mr-2 flex w-1/2 items-center justify-center rounded-lg bg-gray-500 pb-2 pl-4 pr-4 pt-2 font-varela font-bold text-navbar_background hover:cursor-pointer hover:bg-gray-400">
-            Follow
-          </div>
-          <div className="text-md ml-2 mr-2 flex w-1/2 items-center justify-center rounded-lg bg-gray-500 pb-2 pl-4 pr-4 pt-2 font-varela font-bold text-navbar_background hover:cursor-pointer hover:bg-gray-400">
-            Chat
-          </div>
+          {((info != null || info != undefined) && isFriend != null )?(isFriend ? (
+            <>
+              <div className="text-md ml-2 mr-2 flex w-1/2 items-center justify-center rounded-lg bg-gray-500 pb-2 pl-4 pr-4 pt-2 font-varela font-bold text-navbar_background hover:cursor-pointer hover:bg-gray-400">
+                Unfollow
+              </div>
+              <div className="text-md ml-2 mr-2 flex w-1/2 items-center justify-center rounded-lg bg-gray-500 pb-2 pl-4 pr-4 pt-2 font-varela font-bold text-navbar_background hover:cursor-pointer hover:bg-gray-400">
+                Chat
+              </div>
+            </>
+          ) : (
+            <div onClick={()=>{sendFriendRequest()}} className="text-md ml-2 mr-2 flex w-full items-center justify-center rounded-lg bg-gray-500 pb-2 pl-4 pr-4 pt-2 font-varela font-bold text-navbar_background hover:cursor-pointer hover:bg-gray-400">
+              Send follow request
+            </div>
+          )):(<></>)}
         </div>
       </div>
     </div>
