@@ -53,7 +53,7 @@ function OtherProfile() {
       navigate("/messages");
       return;
     }
-    const response = await dataFetch.post("/chat/createchat", {
+    const response = await dataFetch.post("/chats/createchat", {
       user: id,
       isGroup: false,
       chatName: null,
