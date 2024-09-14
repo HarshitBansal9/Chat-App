@@ -24,10 +24,9 @@ router.use(function (req, res, next) {
 
 router.post("/removefriend", async (req, res) => {
   try {
-    const id = getUserId(req);
     const friend = new Friend(req.user.sub);
-    if (typeof req.query.sender === "string") {
-      await friend.removeFriend(req.query.sender);
+    if (typeof req.query.friendId === "string") {
+      await friend.removeFriend(req.query.friendId);
     }
     /*await pool.query(
       "DELETE FROM friends where ((user1_id = $1 and user2_id = $2)or(user1_id = $2 and user2_id = $1)) and accepted = true",

@@ -18,12 +18,6 @@ const navbarLinksTop = [
     auth: true,
   },
   {
-    name: "Friends",
-    icon: <Contact color="rgb(156 163 175)" />,
-    to: "/friends",
-    auth: true,
-  },
-  {
     name: "Profile",
     icon: <User color="rgb(156 163 175)" />,
     to: "/profile",

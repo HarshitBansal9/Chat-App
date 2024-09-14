@@ -89,6 +89,7 @@ router.get("/getmessages", async (req, res) => {
 });
 
 router.post("/createchat", async (req, res) => {
+  console.log("creating chat");
   try {
     const id = getUserId(req);
     const chat = new Chat(req.user.sub);

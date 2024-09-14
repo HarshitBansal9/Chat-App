@@ -6,7 +6,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import "react-cmdk/dist/cmdk.css";
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { atom, useAtom } from "jotai";
 import config from "../config";
 import { Session, UserResponse, createClient } from "@supabase/supabase-js";
@@ -76,11 +76,13 @@ function App() {
             children: "Messages",
             id: "messages",
             icon: MessageSquareMore,
+            onClick: () => {navigate("/");},
           },
           {
             children: "Profile",
             id: "profile",
             icon: User,
+            onClick: () => {navigate("/profile");},
           },
           {
             children: "LogOut",
@@ -147,7 +149,7 @@ function App() {
   const [session, setSession] = useAtom(sessionAtom);
   const [user, setUser] = useAtom(userAtom);
   //const [chats, setChats] = useAtom(currentChats);
-
+  const navigate = useNavigate();
   useEffect(() => {
     async function getUserDetails() {
       if (info === null || info === undefined) {
@@ -166,7 +168,7 @@ function App() {
                 id: friend.auth_user_id,
                 icon: User,
                 onClick: () => {
-                  window.location.href = `/other/${friend.auth_user_id}`;
+                  navigate(`/other/${friend.auth_user_id}`);
                 },
               };
             }),
@@ -185,7 +187,7 @@ function App() {
                 id: request.auth_user_id,
                 icon: User,
                 onClick: () => {
-                  window.location.href = `/other/${request.auth_user_id}`;
+                  navigate(`/other/${request.auth_user_id}`);
                 },
               };
             }),
@@ -204,7 +206,7 @@ function App() {
                 id: member.auth_user_id,
                 icon: User,
                 onClick: () => {
-                  window.location.href = `/other/${member.auth_user_id}`;
+                  navigate(`/other/${member.auth_user_id}`);
                 },
               };
             }),
@@ -223,7 +225,7 @@ function App() {
                 id: request.auth_user_id,
                 icon: User,
                 onClick: () => {
-                  window.location.href = `/other/${request.auth_user_id}`;
+                  navigate(`/other/${request.auth_user_id}`);
                 },
               };
             }),
@@ -327,7 +329,6 @@ function App() {
           )}
         </CommandPalette.Page>
       </CommandPalette>
-      <BrowserRouter>
         <div className="flex flex-row">
           <Navbar />
           <Routes>
@@ -344,7 +345,7 @@ function App() {
             )}
           </Routes>
         </div>
-      </BrowserRouter>
+    
     </>
   );
 }

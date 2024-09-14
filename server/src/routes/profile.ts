@@ -29,8 +29,6 @@ router.get("/getuserdetails", async (req, res) => {
       const userDetails = await profile.getUserDetails(id);
       res.json(userDetails);
     }
-    const userDetails = await profile.getUserDetails();
-    res.json(userDetails);
   } catch (error) {
     console.error(error);
   }
