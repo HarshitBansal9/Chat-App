@@ -41,3 +41,11 @@ Navigate to the respective folders in the terminal and run <strong>npm run dev</
 </li>
 </ul>
 </div>
+<h2>Built Using:</h2>
+<ul>
+<li>Typescript</li>
+<li>React</li>
+<li>Express</li>
+<li>Postgres with supabase</li>
+<li>Socket.io</li>
+</ul>
